@@ -1,0 +1,294 @@
+import React, { useEffect, useState } from 'react';
+import { 
+  X, Save, FileText, Loader2, Upload, 
+  Calendar, DollarSign, User, Briefcase, Eye 
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
+import { createContract, updateContract, type WorkingContract } from '../store/slices/contractSlice';
+import { fetchEmployees } from '../store/slices/employeeSlice';
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  contract?: WorkingContract | null; // If present, we are in Edit/View mode
+  readOnly?: boolean; // New prop for view mode
+}
+
+export const ContractModal = ({ isOpen, onClose, contract, readOnly = false }: Props) => {
+  const dispatch = useAppDispatch();
+  const { isLoading } = useAppSelector((state) => state.contracts);
+  const { items: employees } = useAppSelector((state) => state.employees);
+
+  const [formData, setFormData] = useState({
+    employee: '',
+    contract_number: '',
+    contract_start_date: '',
+    contract_end_date: '',
+    job_title: '',
+    salary: '',
+    bonus: '0.00',
+    allowances: '0.00',
+    notes: '',
+  });
+
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+
+  // Load Employees on mount
+  useEffect(() => {
+    if (isOpen && employees.length === 0) {
+      dispatch(fetchEmployees());
+    }
+  }, [isOpen, dispatch, employees.length]);
+
+  // Load Data for Edit Mode
+  useEffect(() => {
+    if (contract && isOpen) {
+      setFormData({
+        employee: String(contract.employee.id),
+        contract_number: contract.contract_number,
+        contract_start_date: contract.contract_start_date,
+        contract_end_date: contract.contract_end_date,
+        job_title: contract.job_title,
+        salary: contract.salary,
+        bonus: contract.bonus,
+        allowances: contract.allowances,
+        notes: contract.notes,
+      });
+      setPdfFile(null); // Reset file input on edit load
+    } else if (isOpen) {
+      // Reset for Create Mode
+      setFormData({
+        employee: '',
+        contract_number: `WC-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000)}`, // Auto-gen suggestion
+        contract_start_date: new Date().toISOString().split('T')[0],
+        contract_end_date: '',
+        job_title: '',
+        salary: '',
+        bonus: '0.00',
+        allowances: '0.00',
+        notes: '',
+      });
+      setPdfFile(null);
+    }
+  }, [contract, isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (readOnly) return; // Prevent submission in read-only mode
+
+    if (!formData.employee) {
+        alert("Erreur : Veuillez sélectionner un employé.");
+        return;
+    }
+    
+    const payload: any = { 
+        ...formData,
+        employee: Number(formData.employee)
+    };
+    
+    // Only attach file if a new one was selected
+    if (pdfFile) {
+      payload.contract_pdf = pdfFile;
+    }
+
+    try {
+      if (contract) {
+        await dispatch(updateContract({ id: contract.id, data: payload })).unwrap();
+      } else {
+        await dispatch(createContract(payload)).unwrap();
+      }
+      onClose();
+    } catch (err) {
+      console.error("Error saving contract", err);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 font-sans">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0" />
+      
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0, y: 20 }} 
+        animate={{ scale: 1, opacity: 1, y: 0 }} 
+        className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden relative z-10 flex flex-col max-h-[90vh]"
+      >
+        {/* Header */}
+        <div className="bg-slate-900 p-8 flex justify-between items-center text-white">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/10 rounded-xl">
+              {readOnly ? <Eye size={24}/> : <FileText size={24} />}
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">
+                {readOnly ? 'Détails du Contrat' : (contract ? 'Modifier le Contrat' : 'Nouveau Contrat')}
+              </h2>
+              <p className="text-slate-400 text-xs uppercase tracking-widest mt-1">
+                {readOnly ? 'Mode Lecture Seule' : 'Gestion RH'}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-8 overflow-y-auto flex-1 custom-scrollbar">
+          <fieldset disabled={readOnly} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            {/* Section 1: Employee & Contract Info */}
+            <div className="space-y-6">
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">Informations Générales</h3>
+              
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Employé</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <select 
+                    required 
+                    value={formData.employee} 
+                    onChange={(e) => setFormData({...formData, employee: e.target.value})}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:border-blue-500 appearance-none disabled:bg-slate-100"
+                  >
+                    <option value="">Sélectionner un employé...</option>
+                    {employees.map(e => (
+                      <option key={e.id} value={e.id}>{e.user.first_name} {e.user.last_name} ({e.cin})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Poste / Intitulé</label>
+                <div className="relative">
+                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input 
+                    type="text" 
+                    required 
+                    value={formData.job_title} 
+                    onChange={(e) => setFormData({...formData, job_title: e.target.value})}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:border-blue-500 disabled:bg-slate-100"
+                    placeholder="ex: Ingénieur Site"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">N° Contrat</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={formData.contract_number} 
+                    onChange={(e) => setFormData({...formData, contract_number: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold text-slate-700 outline-none focus:border-blue-500 disabled:bg-slate-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">PDF Contrat</label>
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      accept=".pdf"
+                      disabled={readOnly}
+                      onChange={(e) => setPdfFile(e.target.files ? e.target.files[0] : null)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
+                    />
+                    <div className={`w-full px-4 py-3 border border-slate-200 rounded-xl flex items-center gap-2 ${pdfFile ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-50 text-slate-400'} ${readOnly ? 'opacity-70' : ''}`}>
+                      {pdfFile ? <FileText size={18}/> : <Upload size={18}/>}
+                      <span className="text-xs font-bold truncate">
+                        {readOnly && !pdfFile ? 'Aucun fichier joint' : (pdfFile ? pdfFile.name : "Upload PDF")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Financials & Dates */}
+            <div className={`space-y-6 ${readOnly ? 'opacity-90' : ''}`}>
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">Conditions & Salaire</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Début</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="date" 
+                      required 
+                      value={formData.contract_start_date} 
+                      onChange={(e) => setFormData({...formData, contract_start_date: e.target.value})}
+                      className="w-full pl-10 pr-2 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm text-slate-700 outline-none focus:border-blue-500 disabled:bg-slate-100"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Fin</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="date" 
+                      required 
+                      value={formData.contract_end_date} 
+                      onChange={(e) => setFormData({...formData, contract_end_date: e.target.value})}
+                      className="w-full pl-10 pr-2 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm text-slate-700 outline-none focus:border-blue-500 disabled:bg-slate-100"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Salaire Base</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 text-emerald-500" size={14} />
+                    <input type="number" required value={formData.salary} onChange={(e) => setFormData({...formData, salary: e.target.value})} className="w-full pl-6 pr-2 py-3 bg-white border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-emerald-500 disabled:bg-slate-100" placeholder="0.00" />
+                  </div>
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Bonus</label>
+                  <input type="number" value={formData.bonus} onChange={(e) => setFormData({...formData, bonus: e.target.value})} className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-blue-500 disabled:bg-slate-100" placeholder="0.00" />
+                </div>
+                <div className="col-span-1">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Indemnités</label>
+                  <input type="number" value={formData.allowances} onChange={(e) => setFormData({...formData, allowances: e.target.value})} className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-blue-500 disabled:bg-slate-100" placeholder="0.00" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Notes</label>
+                <textarea 
+                  rows={3}
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 outline-none resize-none focus:bg-white focus:border-slate-300 disabled:bg-slate-100"
+                  placeholder="Conditions particulières..."
+                />
+              </div>
+            </div>
+          </fieldset>
+        </form>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-4">
+          <button type="button" onClick={onClose} className="px-6 py-3 text-slate-500 font-bold text-sm hover:text-slate-800 transition-colors">
+            {readOnly ? 'Fermer' : 'Annuler'}
+          </button>
+          
+          {!readOnly && (
+            <button 
+              onClick={handleSubmit} 
+              disabled={isLoading}
+              className="bg-slate-900 hover:bg-black text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg shadow-slate-900/20 flex items-center gap-2 transition-all disabled:opacity-70"
+            >
+              {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />} Enregistrer
+            </button>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
