@@ -15,31 +15,39 @@ export interface Responsible {
   company?: any;
 }
 
+export interface ChantierDocument {
+  id: number;
+  document: string; // The URL to the PDF
+  created_at?: string;
+}
+
 export interface Chantier {
+  document: any;
   id: number;
   name: string;
   location: string;
   description: string;
   contract_number: string;
   contract_date: string;
-  department: number;
-  client: number;
+  department: number; // ID of the department
+  client: number;     // ID of the client
   
   // Visuals
   image?: string | null;
   
-  // PDF Document URL
-  document?: string | null;
+  // --- NEW: Multiple Documents ---
+  documents?: ChantierDocument[]; 
 
-  // SENDING TO BACKEND: Array of IDs (e.g. [4, 5])
+  // SENDING TO BACKEND: Arrays of IDs
   responsible_ids?: number[]; 
-  
-  // RECEIVING FROM BACKEND: Array of Objects
+  employee_ids?: number[];
+
+  // RECEIVING FROM BACKEND: Detailed Arrays
   responsible?: Responsible[]; 
+  employees?: any[]; // Full employee objects
   
   start_date: string;
   end_date: string;
-  employees: any[]; 
   created_at: string;
 }
 
@@ -61,7 +69,7 @@ const initialState: ChantierState = {
   success: false,
 };
 
-// --- HELPER: Convert Object to FormData (Handles Arrays & Files) ---
+// --- HELPER: Convert Object to FormData (Handles Arrays & Multiple Files) ---
 const createFormData = (data: any) => {
   const formData = new FormData();
   
@@ -71,18 +79,23 @@ const createFormData = (data: any) => {
     // Skip null/undefined
     if (value === undefined || value === null) return;
 
-    // 1. Handle Arrays (e.g. responsible_ids: [4, 5, 6])
-    // Result in FormData: responsible_ids=4, responsible_ids=5, etc.
+    // 1. Handle Arrays (e.g., employee_ids: [1, 2], uploaded_documents: [File1, File2])
     if (Array.isArray(value)) {
         value.forEach((item) => {
-            formData.append(key, String(item));
+            if (item instanceof File) {
+                // If it's a file array (uploaded_documents), append the file directly
+                formData.append(key, item);
+            } else {
+                // If it's an ID array (employee_ids), append as string
+                formData.append(key, String(item));
+            }
         });
     }
-    // 2. Handle File objects (image or document PDF)
+    // 2. Handle Single File object (e.g., image cover)
     else if (value instanceof File) {
       formData.append(key, value);
     } 
-    // 3. Handle standard fields
+    // 3. Handle standard fields (strings, numbers, booleans)
     else {
       formData.append(key, String(value));
     }
@@ -107,17 +120,17 @@ export const fetchChantiers = createAsyncThunk(
   }
 );
 
-// 2. Create Chantier (Handles Files & Arrays)
+// 2. Create Chantier (Handles Multiple Files & Arrays)
 export const createChantier = createAsyncThunk(
   'chantiers/create',
   async (data: any, { rejectWithValue }) => {
     try {
-      // Use helper to format responsible_ids and files correctly
+      // Use helper to format responsible_ids, employee_ids and uploaded_documents correctly
       const formData = createFormData(data);
 
       const response = await safeApi.post<Chantier>('/chantiers/', formData, {
         headers: {
-          'Content-Type': undefined as any // Let browser set boundary
+          'Content-Type': 'multipart/form-data', // Explicitly cleaner, though axios often handles it
         }
       });
       return response.data;
@@ -128,7 +141,7 @@ export const createChantier = createAsyncThunk(
   }
 );
 
-// 3. Update Chantier (Handles Files & Arrays)
+// 3. Update Chantier (Handles Multiple Files & Arrays)
 export const updateChantier = createAsyncThunk(
   'chantiers/update',
   async ({ id, data }: { id: number; data: any }, { rejectWithValue }) => {
@@ -137,7 +150,7 @@ export const updateChantier = createAsyncThunk(
 
       const response = await safeApi.patch<Chantier>(`/chantiers/${id}/`, formData, {
         headers: {
-          'Content-Type': undefined as any
+          'Content-Type': 'multipart/form-data',
         }
       });
       return response.data;

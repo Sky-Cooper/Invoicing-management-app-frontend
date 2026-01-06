@@ -8,7 +8,7 @@ const PublicOnlyRoute = () => {
   // If we have a token, user is already logged in. 
   // Redirect them to dashboard immediately.
   if (token) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/Profile" replace />;
   }
 
   // If no token, allow them to see the Login/Register page

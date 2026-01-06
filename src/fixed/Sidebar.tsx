@@ -9,7 +9,7 @@ import {
   LogOut, Briefcase, 
   ChevronLeft, ChevronRight, X, ShieldCheck,
   HardHat, ClipboardList, Package, Bell, CreditCard,
-  Banknote, FilePlus, ShoppingCart, FileCheck, Calculator // Added Calculator
+  Banknote, FilePlus, ShoppingCart, FileCheck, Calculator, Wallet 
 } from 'lucide-react';
 import { useAppDispatch } from '../store/hooks/hooks';
 import type { RootState } from '../store/store';
@@ -22,7 +22,6 @@ export const NAV_ITEMS = [
     icon: LayoutDashboard, 
     id: 'dashboard', 
     path: '/dashboard', 
-    // Everyone needs access to the dashboard landing page
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN'], 
     category: 'HOME' 
   },
@@ -33,7 +32,6 @@ export const NAV_ITEMS = [
     icon: Users, 
     id: 'clients', 
     path: '/clients', 
-    // Invoicing admin needs clients to bill them
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN'], 
     category: 'BUSINESS' 
   },
@@ -42,7 +40,6 @@ export const NAV_ITEMS = [
     icon: HardHat, 
     id: 'chantiers', 
     path: '/chantiers', 
-    // Invoicing admin needs projects to link invoices
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN'], 
     category: 'BUSINESS' 
   },
@@ -51,7 +48,6 @@ export const NAV_ITEMS = [
     icon: Package, 
     id: 'items', 
     path: '/items', 
-    // Invoicing admin needs items to add to invoices
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'INVOICING_ADMIN'], 
     category: 'BUSINESS' 
   },
@@ -60,7 +56,6 @@ export const NAV_ITEMS = [
     icon: FilePlus, 
     id: 'quotes', 
     path: '/quotes', 
-    // Access for Super Admin, Company Admin, and Invoicing Admin
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'INVOICING_ADMIN'], 
     category: 'BUSINESS' 
   },
@@ -70,7 +65,6 @@ export const NAV_ITEMS = [
     icon: ShoppingCart, 
     id: 'purchase-orders', 
     path: '/purchase-orders', 
-    // Access for Super Admin, Company Admin, and Invoicing Admin
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'INVOICING_ADMIN'], 
     category: 'BUSINESS' 
   },
@@ -79,17 +73,24 @@ export const NAV_ITEMS = [
     icon: FileText, 
     id: 'invoices', 
     path: '/invoices', 
-    // Specific access for Invoicing Admin
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'INVOICING_ADMIN'], 
     category: 'BUSINESS' 
   },
-    { 
+  { 
     name: 'Dépenses', 
     icon: Banknote, 
     id: 'expenses', 
     path: '/expenses', 
-    // Only Super Admin, Company Admin, and Invoicing Admin allowed
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'HR_ADMIN'], 
+    category: 'BUSINESS' 
+  },
+  // --- NEW: CHARGES FIXES ---
+  { 
+    name: 'Charges Fixes', 
+    icon: Wallet, 
+    id: 'fixed-charges', 
+    path: '/fixed-charges', 
+    roles: ['SUPER_ADMIN', 'COMPANY_ADMIN'], 
     category: 'BUSINESS' 
   },
   { 
@@ -97,7 +98,6 @@ export const NAV_ITEMS = [
     icon: CreditCard, 
     id: 'payments', 
     path: '/payments', 
-    // Specific access for Invoicing Admin
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'INVOICING_ADMIN'], 
     category: 'BUSINESS' 
   },
@@ -120,7 +120,7 @@ export const NAV_ITEMS = [
     category: 'HR' 
   },
   { 
-    name: 'Solde Tout Compte', // [NEW] Link Added
+    name: 'Solde Tout Compte', 
     icon: Calculator, 
     id: 'eosb', 
     path: '/eosb', 

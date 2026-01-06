@@ -4,7 +4,6 @@ import {
   PieChart, Pie, Cell, AreaChart, Area, 
 } from 'recharts';
 import { 
-  TrendingUp, Wallet, FileText, ArrowUpRight, 
   Activity, Search, Bell, Settings as SettingsIcon, Globe, Smartphone, Store, UserCheck, ChevronRight
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
@@ -21,8 +20,16 @@ export const DashboardPage = () => {
     dispatch(fetchBasicDashboard());
   }, [dispatch]);
 
+  // --- HELPER 1: Standard Format (for tooltips/details) ---
   const formatMAD = (v: number) => 
     new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', maximumFractionDigits: 0 }).format(v);
+
+  // --- HELPER 2: Compact Format (for Cards & Pie Chart to prevent overflow) ---
+  const formatCompact = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'; // 1.5M
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';       // 150k
+    return num.toString();
+  };
 
   if (isLoading || !basic) {
     return (
@@ -41,7 +48,7 @@ export const DashboardPage = () => {
       {/* 1. MINIMAL HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Analytics <span className="text-indigo-600">Performance</span></h1>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Analytics <span className="text-red-600">Performance</span></h1>
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">TOURTRA Construction v2.0</p>
         </div>
         <div className="flex items-center gap-3">
@@ -67,7 +74,8 @@ export const DashboardPage = () => {
           
           <StatCard 
             label="Encaissé" 
-            value={formatMAD(summary.total_collected)} 
+            value={formatCompact(summary.total_collected)} 
+            unit="DH"
             tag="Entrant" 
             color="emerald"
             icon={<Globe size={14} />}
@@ -75,7 +83,8 @@ export const DashboardPage = () => {
 
           <StatCard 
             label="Dépenses" 
-            value={formatMAD(summary.total_expenses)} 
+            value={formatCompact(summary.total_expenses)} 
+            unit="DH"
             tag="Sortant" 
             color="indigo"
             icon={<Smartphone size={14} />}
@@ -83,7 +92,8 @@ export const DashboardPage = () => {
 
           <StatCard 
             label="Créances" 
-            value={formatMAD(summary.outstanding_balance)} 
+            value={formatCompact(summary.outstanding_balance)} 
+            unit="DH"
             tag="Attente" 
             color="amber"
             icon={<Store size={14} />}
@@ -91,7 +101,8 @@ export const DashboardPage = () => {
 
           <StatCard 
             label="Volume" 
-            value={`${summary.invoice_count} Fact.`} 
+            value={summary.invoice_count} 
+            unit="Fact."
             tag="Activité" 
             color="slate"
             icon={<UserCheck size={14} />}
@@ -111,15 +122,23 @@ export const DashboardPage = () => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="chantier_name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700}} dy={10} />
                 <YAxis hide />
-                <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
-                <Bar dataKey="revenue" fill="#4f46e5" radius={[4, 4, 0, 0]} barSize={24} />
-                <Bar dataKey="expenses" fill="#e2e8f0" radius={[4, 4, 0, 0]} barSize={24} />
+                <Tooltip 
+                    formatter={(value: any) => [formatMAD(Number(value)), ""]}
+                    cursor={{fill: '#f8fafc'}} 
+                    contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} 
+                />
+                <Bar dataKey="revenue" fill="#4f46e5" radius={[4, 4, 0, 0]} barSize={24} name="Revenu" />
+                
+                {/* ✅ CHANGED: Expense Bar is now RED (#ef4444) */}
+                <Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={24} name="Dépense" />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="flex gap-6 mt-4 justify-center border-t border-slate-50 pt-4">
             <LegendItem color="#4f46e5" label="Revenu" />
-            <LegendItem color="#e2e8f0" label="Dépense" />
+            
+            {/* ✅ CHANGED: Legend color updated to Red */}
+            <LegendItem color="#ef4444" label="Dépense" />
           </div>
         </ChartContainer>
 
@@ -133,21 +152,27 @@ export const DashboardPage = () => {
                     <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip formatter={(value: any) => formatMAD(Number(value))} />
               </PieChart>
             </ResponsiveContainer>
+            
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                <span className="text-xs font-black text-slate-400 uppercase">Total</span>
-               <span className="text-lg font-black text-indigo-600">{formatMAD(summary.total_expenses).split(',')[0]}</span>
+               <span className="text-2xl font-black text-indigo-600 tracking-tighter">
+                 {formatCompact(summary.total_expenses)}
+               </span>
+               <span className="text-[10px] font-bold text-slate-300">MAD</span>
             </div>
           </div>
-          <div className="space-y-2 mt-4">
-            {expense_by_category.slice(0, 3).map((item, idx) => (
+
+          <div className="space-y-3 mt-4">
+            {expense_by_category.slice(0, 4).map((item, idx) => (
               <div key={idx} className="flex justify-between items-center text-[11px] font-bold">
                 <span className="text-slate-500 uppercase flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{backgroundColor: CHART_COLORS[idx]}} /> {item.category}
+                  <div className="w-2 h-2 rounded-full" style={{backgroundColor: CHART_COLORS[idx]}} /> 
+                  <span className="truncate max-w-[100px]">{item.category}</span>
                 </span>
-                <span className="text-slate-900">{formatMAD(item.total_amount)}</span>
+                <span className="text-slate-900">{formatCompact(item.total_amount)} <span className="text-slate-400 text-[9px]">DH</span></span>
               </div>
             ))}
           </div>
@@ -171,7 +196,7 @@ const MainKpiCard = ({ label, value, sub, trend }: any) => (
   <div className="flex flex-col justify-between p-2">
     <div>
       <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{label}</span>
-      <h3 className="text-2xl font-black text-slate-900 tracking-tighter mt-1 truncate">{value}</h3>
+      <h3 className="text-2xl font-black text-slate-900 tracking-tighter mt-1 truncate" title={value}>{value}</h3>
       <div className="flex items-center gap-2 mt-1">
         <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-md">{trend}</span>
         <span className="text-[10px] font-medium text-slate-400 truncate">{sub}</span>
@@ -180,7 +205,7 @@ const MainKpiCard = ({ label, value, sub, trend }: any) => (
   </div>
 );
 
-const StatCard = ({ label, value, tag, color, icon }: any) => {
+const StatCard = ({ label, value, unit, tag, color, icon }: any) => {
   const colors: any = {
     emerald: "text-emerald-600 bg-emerald-50",
     indigo: "text-indigo-600 bg-indigo-50",
@@ -195,7 +220,9 @@ const StatCard = ({ label, value, tag, color, icon }: any) => {
       </div>
       <div className="space-y-0.5">
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{label}</p>
-        <p className="text-lg font-black text-slate-800 tracking-tighter truncate">{value}</p>
+        <p className="text-xl font-black text-slate-800 tracking-tighter truncate">
+            {value} <small className="text-xs text-slate-400 font-bold">{unit}</small>
+        </p>
       </div>
     </div>
   );

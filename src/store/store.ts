@@ -20,6 +20,7 @@ import quoteReducer from './slices/quoteSlice';
 import purchaseOrderReducer from './slices/purchaseOrderSlice';
 import contractReducer from './slices/contractSlice';
 import eosbReducer from './slices/eosbSlice';
+import fixedChargeReducer from './slices/fixedChargeSlice';
 export const store = configureStore({
   reducer: {
     user: userReducer,
@@ -40,6 +41,7 @@ export const store = configureStore({
     purchaseOrders: purchaseOrderReducer,
     contracts: contractReducer,
     eosb: eosbReducer,
+    fixedCharges: fixedChargeReducer
 
   },
 });

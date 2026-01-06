@@ -33,16 +33,14 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
   const hrAdmins = admins.filter(admin => admin.role === 'HR_ADMIN' && admin.id !== undefined);
 
   // --- STATE ---
-  const [documentName, setDocumentName] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   const [formData, setFormData] = useState<Partial<Chantier> & { 
-    documentFile?: File | null, 
     responsible_ids: number[] 
   }>({
     name: '', location: '', description: '', contract_number: '', contract_date: '',
     department: undefined, client: undefined, responsible_ids: [], 
     start_date: new Date().toISOString().split('T')[0], end_date: '',
-    documentFile: null
   });
 
   // --- INITIALIZATION ---
@@ -52,32 +50,23 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
       dispatch(fetchClients());
       dispatch(fetchDeptAdmins());
 
+      // Reset files on open
+      setUploadedFiles([]);
+
       if (initialData) {
         setFormData({
           ...initialData,
           client: typeof initialData.client === 'object' ? (initialData.client as any).id : initialData.client,
           department: typeof initialData.department === 'object' ? (initialData.department as any).id : initialData.department,
           responsible_ids: initialData.responsible ? initialData.responsible.map(r => r.id) : [],
-          documentFile: null
         });
-        
-        // Handle Document Name
-        if (initialData.document) {
-            const name = initialData.document.split('/').pop();
-            setDocumentName(name || 'Document existant');
-        } else {
-            setDocumentName(null);
-        }
-
       } else {
-        // Reset
+        // Reset Form
         setFormData({
           name: '', location: '', description: '', contract_number: '', contract_date: '',
           department: undefined, client: undefined, responsible_ids: [], 
           start_date: new Date().toISOString().split('T')[0], end_date: '',
-          documentFile: null
         });
-        setDocumentName(null);
       }
     }
   }, [initialData, isOpen, dispatch]);
@@ -95,17 +84,17 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
 
   // --- HANDLERS ---
 
-  // PDF Logic Only
+  // Standard File Selection (Multiple)
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-        const file = e.target.files[0];
-        setFormData(prev => ({ ...prev, documentFile: file }));
-        setDocumentName(file.name);
+    if (e.target.files && e.target.files.length > 0) {
+        const newFiles = Array.from(e.target.files).filter(file => file.type === 'application/pdf');
+        // Append new files to existing ones (No limit)
+        setUploadedFiles(prev => [...prev, ...newFiles]);
     }
   };
-  const handleRemoveDocument = () => {
-      setFormData(prev => ({ ...prev, documentFile: null }));
-      setDocumentName(null);
+
+  const handleRemoveFile = (indexToRemove: number) => {
+      setUploadedFiles(prev => prev.filter((_, index) => index !== indexToRemove));
   };
 
   // Multi-select Logic
@@ -137,8 +126,9 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
       responsible_ids: formData.responsible_ids, 
       start_date: formData.start_date,
       end_date: formData.end_date || null,
-      // Only sending Document, no Image
-      document: formData.documentFile 
+      
+      // SEND UNLIMITED ARRAY OF FILES
+      uploaded_documents: uploadedFiles 
     };
 
     if (initialData?.id) {
@@ -192,52 +182,82 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
             <div className="flex-1 overflow-y-auto no-scrollbar p-8 lg:p-14">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
                 
-                {/* --- LEFT COLUMN: PDF ONLY (No Image) --- */}
+                {/* --- LEFT COLUMN: PDF UPLOADER (Multiple Files) --- */}
                 <div className="lg:col-span-3 flex flex-col gap-8">
                   
                   <div className="space-y-4">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Contrat / Marché</p>
-                     
-                     <div className="relative aspect-square w-full">
-                        <label className={`
-                            absolute inset-0 flex flex-col items-center justify-center p-6 rounded-[2.5rem] border-2 border-dashed transition-all cursor-pointer group
-                            ${documentName ? 'bg-red-50/50 border-red-200' : 'bg-white border-slate-200 hover:border-red-300 hover:bg-red-50/10'}
-                        `}>
-                            {/* Input accepts PDF */}
-                            <input type="file" accept="application/pdf" className="hidden" onChange={handleDocumentChange} />
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Documents & Marchés</p>
+                      
+                      {/* UPLOAD ZONE */}
+                      <div className="relative aspect-[4/3] w-full">
+                         <label className="absolute inset-0 flex flex-col items-center justify-center p-6 rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/10 transition-all cursor-pointer group z-10">
                             
-                            {documentName ? (
-                                <div className="flex flex-col items-center gap-4 text-red-600 animate-in fade-in zoom-in duration-300">
-                                    <div className="p-4 bg-white rounded-2xl shadow-sm">
-                                        <FileIcon size={40} />
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Fichier sélectionné</p>
-                                        <span className="text-xs font-bold text-slate-800 break-all line-clamp-2 px-2">{documentName}</span>
+                            {/* STANDARD FILE INPUT (Hidden) */}
+                            <input 
+                                type="file" 
+                                accept="application/pdf" 
+                                multiple // Supports multiple files
+                                className="hidden" 
+                                onChange={handleDocumentChange} 
+                            />
+                            
+                            <div className="flex flex-col items-center gap-4 text-slate-300 group-hover:text-red-400 transition-colors">
+                                <div className="p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform">
+                                    <Paperclip size={32} />
+                                </div>
+                                <div className="text-center">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest block">Sélectionner fichiers</span>
+                                    <span className="text-[8px] font-bold text-slate-300 mt-1 block">ou glisser-déposer</span>
+                                </div>
+                            </div>
+                         </label>
+                      </div>
+
+                      {/* FILE LIST */}
+                      <div className="flex flex-col gap-2 mt-4 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
+                         {uploadedFiles.length > 0 ? (
+                            uploadedFiles.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-slate-100 animate-in fade-in slide-in-from-left-4">
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className="p-2 bg-red-50 text-red-600 rounded-xl shrink-0">
+                                            <FileIcon size={16} />
+                                        </div>
+                                        <div className="flex flex-col overflow-hidden">
+                                            <span className="text-[10px] font-bold text-slate-700 truncate">{file.name}</span>
+                                            <span className="text-[8px] font-bold text-slate-400">{(file.size / 1024).toFixed(0)} KB</span>
+                                        </div>
                                     </div>
                                     <button 
                                         type="button" 
-                                        onClick={(e) => { e.preventDefault(); handleRemoveDocument(); }} 
-                                        className="mt-2 text-[9px] font-black uppercase bg-white px-4 py-2 rounded-full shadow-sm hover:text-red-800 hover:shadow-md transition-all"
+                                        onClick={() => handleRemoveFile(index)} 
+                                        className="text-slate-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-full transition-colors"
                                     >
-                                        Supprimer
+                                        <Trash2 size={14} />
                                     </button>
                                 </div>
-                            ) : (
-                                <div className="flex flex-col items-center gap-4 text-slate-300 group-hover:text-red-400 transition-colors">
-                                    <div className="p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform">
-                                        <Paperclip size={32} />
-                                    </div>
-                                    <div className="text-center">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest block">Déposer le PDF</span>
-                                        <span className="text-[8px] font-bold text-slate-300 mt-1 block">Contrat Signé</span>
-                                    </div>
-                                </div>
-                            )}
-                        </label>
-                     </div>
-                  </div>
+                            ))
+                         ) : (
+                             <div className="text-center py-4 opacity-50">
+                                 <p className="text-[9px] font-bold text-slate-400 uppercase italic">Aucun document ajouté</p>
+                             </div>
+                         )}
 
+                         {/* Existing Documents (If Edit Mode) */}
+                         {initialData?.documents && initialData.documents.length > 0 && (
+                            <div className="mt-4 pt-4 border-t border-dashed border-slate-200">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center">Documents existants</p>
+                                {initialData.documents.map((doc, idx) => (
+                                    <div key={doc.id || idx} className="flex items-center gap-2 mb-2 px-2 py-1 opacity-60">
+                                        <CheckCircle2 size={12} className="text-emerald-500" />
+                                        <a href={doc.document} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-slate-600 truncate hover:text-red-600 hover:underline">
+                                            Document #{idx + 1}
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                         )}
+                      </div>
+                  </div>
                 </div>
 
                 {/* --- RIGHT COLUMN: FORM DATA --- */}

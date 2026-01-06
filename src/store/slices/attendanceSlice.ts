@@ -12,6 +12,18 @@ export interface Attendance {
   chantier: number | { id: number; name: string };
 }
 
+// New Interface for Reports
+export interface AttendanceReport {
+  id: number;
+  title: string;
+  report_type: 'WEEKLY' | 'MONTHLY';
+  start_date: string;
+  end_date: string;
+  file: string;
+  file_url: string;
+  created_at: string;
+}
+
 export interface AttendancePayload {
   date: string;
   present: boolean;
@@ -22,20 +34,25 @@ export interface AttendancePayload {
 
 interface AttendanceState {
   items: Attendance[];
+  reports: AttendanceReport[]; // <--- Added reports array
   isLoading: boolean;
+  isReportsLoading: boolean;   // <--- Specific loading state for reports
   success: boolean;
   error: any | null;
 }
 
 const initialState: AttendanceState = {
   items: [],
+  reports: [],
   isLoading: false,
+  isReportsLoading: false,
   success: false,
   error: null,
 };
 
 // --- THUNKS ---
 
+// 1. FETCH ATTENDANCE RECORDS (Grid)
 export const fetchAttendances = createAsyncThunk(
   'attendances/fetchAll',
   async (dateFilter: string, { rejectWithValue }) => {
@@ -49,6 +66,30 @@ export const fetchAttendances = createAsyncThunk(
   }
 );
 
+// 2. FETCH REPORTS (New Implementation)
+// Pass 'ALL', 'WEEKLY', or 'MONTHLY' to target specific endpoints
+export const fetchAttendanceReports = createAsyncThunk(
+  'attendances/fetchReports',
+  async (type: 'ALL' | 'WEEKLY' | 'MONTHLY' = 'ALL', { rejectWithValue }) => {
+    try {
+      let url = '/attendance-reports/';
+      
+      if (type === 'WEEKLY') {
+        url = '/attendance-reports/weekly/';
+      } else if (type === 'MONTHLY') {
+        url = '/attendance-reports/monthly/';
+      }
+
+      const response = await safeApi.get<AttendanceReport[]>(url);
+      return response.data;
+    } catch (err) {
+      const error = err as AxiosError<any>;
+      return rejectWithValue(error.response?.data?.detail || 'Erreur de chargement des rapports');
+    }
+  }
+);
+
+// 3. MARK/UPDATE ATTENDANCE
 export const markAttendance = createAsyncThunk(
   'attendances/mark',
   async ({ id, data }: { id?: number; data: AttendancePayload }, { rejectWithValue }) => {
@@ -70,6 +111,7 @@ export const markAttendance = createAsyncThunk(
   }
 );
 
+// 4. DELETE ATTENDANCE
 export const deleteAttendance = createAsyncThunk(
   'attendances/delete',
   async (id: number, { rejectWithValue }) => {
@@ -89,7 +131,7 @@ const attendanceSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // --- Fetch ---
+      // --- Fetch Records ---
       .addCase(fetchAttendances.pending, (state) => { 
         state.isLoading = true; 
         state.error = null; 
@@ -100,6 +142,20 @@ const attendanceSlice = createSlice({
       })
       .addCase(fetchAttendances.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // --- Fetch Reports (New) ---
+      .addCase(fetchAttendanceReports.pending, (state) => {
+        state.isReportsLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchAttendanceReports.fulfilled, (state, action) => {
+        state.isReportsLoading = false;
+        state.reports = action.payload;
+      })
+      .addCase(fetchAttendanceReports.rejected, (state, action) => {
+        state.isReportsLoading = false;
         state.error = action.payload;
       })
 
@@ -115,12 +171,10 @@ const attendanceSlice = createSlice({
         const index = state.items.findIndex(i => i.id === action.payload.id);
         
         if (index !== -1) {
-          // FIX: Use map to force React to detect the change instantly
           state.items = state.items.map(item => 
             item.id === action.payload.id ? action.payload : item
           );
         } else {
-          // If it's new, push is fine
           state.items.push(action.payload);
         }
       })

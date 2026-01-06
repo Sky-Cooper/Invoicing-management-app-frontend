@@ -56,11 +56,9 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
       
       if (initialData) {
         // --- EDIT MODE ---
-        // ✅ FIX: Simplify department extraction based on new JSON structure
-        // The API returns "department": null OR "department": 5 (number)
         const deptValue = initialData.user.department 
-            ? String(initialData.user.department) 
-            : ''; 
+          ? String(initialData.user.department) 
+          : ''; 
 
         setFormData({
           ...initialData,
@@ -68,7 +66,7 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
             ...initialData.user,
             password: '', 
             phone_number: initialData.user.phone_number || '+212', 
-            department: deptValue, // Now safely a string or empty string
+            department: deptValue, 
             company: initialData.user.company ? String(initialData.user.company) : (storedUser?.company || '')
           }
         } as any);
@@ -97,11 +95,30 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
     }
   }, [success, dispatch, onClose, isOpen]);
 
-  // --- PHONE HANDLER ---
+  // --- PHONE HANDLER (UPDATED) ---
   const handlePhoneChange = (value: string) => {
+    // 1. Remove non-numeric characters
     let rawValue = value.replace(/[^0-9]/g, "");
-    if (!rawValue.startsWith("212")) rawValue = "212";
-    if (rawValue.length > 12) rawValue = rawValue.slice(0, 12);
+
+    // 2. Smart handling: Convert local '06' or '07' to '2126' / '2127'
+    if (rawValue.startsWith("06")) {
+      rawValue = "2126" + rawValue.substring(2);
+    } else if (rawValue.startsWith("07")) {
+      rawValue = "2127" + rawValue.substring(2);
+    }
+
+    // 3. Enforce '212' prefix logic
+    // If the user tries to delete the prefix or it doesn't exist, enforce it
+    if (!rawValue.startsWith("212")) {
+       rawValue = "212";
+    }
+
+    // 4. Limit length (212 + 9 digits = 12 digits total)
+    if (rawValue.length > 12) {
+        rawValue = rawValue.slice(0, 12);
+    }
+
+    // 5. Add Plus Sign
     const formattedPhone = "+" + rawValue;
     
     setFormData((prev: any) => ({
@@ -113,7 +130,6 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // ✅ FIX: Ensure we send null if string is empty, NOT 0
     const finalDepartmentId = isCompanyAdmin 
         ? (formData.user.department ? Number(formData.user.department) : null)
         : (myDeptId ? Number(myDeptId) : null);
@@ -249,7 +265,7 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
                       required />
                     
                     <InputField 
-                        label="Mobile" 
+                        label="Mobile (+212 6/7...)" 
                         icon={<Phone size={20}/>} 
                         value={formData.user.phone_number} 
                         onChange={handlePhoneChange} 

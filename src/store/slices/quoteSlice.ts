@@ -38,6 +38,7 @@ export interface CreateQuotePayload {
 export type UpdateQuotePayload = Partial<CreateQuotePayload>;
 
 export interface Quote {
+    chantier_name: string;
     id: number;
     quote_number: string;
     client: number;

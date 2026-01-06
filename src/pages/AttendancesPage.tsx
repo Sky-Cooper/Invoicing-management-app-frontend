@@ -3,12 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   Calendar, UserCheck, HardHat, Check, X, 
   Loader2, Filter, Building2, Users,
-  AlertTriangle
+  AlertTriangle, FileText, Download, ChevronRight, File
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import type { AppDispatch, RootState } from '../store/store';
-import { fetchAttendances, markAttendance, deleteAttendance } from '../store/slices/attendanceSlice';
+// Added fetchAttendanceReports here
+import { fetchAttendances, markAttendance, deleteAttendance, fetchAttendanceReports } from '../store/slices/attendanceSlice';
 import { fetchEmployees } from '../store/slices/employeeSlice';
 import { fetchChantiers } from '../store/slices/chantierSlice';
 import { fetchAssignments } from '../store/slices/assignmentSlice'; 
@@ -21,6 +22,105 @@ interface ModalConfig {
   employeeId: number | null;
   attendanceId?: number;
 }
+
+// --- SUB-COMPONENT: REPORTS MODAL ---
+const ReportsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { reports, isReportsLoading } = useSelector((state: RootState) => state.attendances);
+  const [filterType, setFilterType] = useState<'ALL' | 'WEEKLY' | 'MONTHLY'>('ALL');
+
+  useEffect(() => {
+    if (isOpen) {
+      dispatch(fetchAttendanceReports(filterType));
+    }
+  }, [isOpen, filterType, dispatch]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div>
+            <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
+              <FileText className="text-blue-600" /> Rapports de Pointage
+            </h3>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Historique et Téléchargements</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+            <X size={20} className="text-slate-400" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex p-2 bg-white border-b border-slate-100">
+          {(['ALL', 'WEEKLY', 'MONTHLY'] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => setFilterType(type)}
+              className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all
+                ${filterType === type ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}
+              `}
+            >
+              {type === 'ALL' ? 'Tous' : type === 'WEEKLY' ? 'Hebdomadaire' : 'Mensuel'}
+            </button>
+          ))}
+        </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
+          {isReportsLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+              <Loader2 size={32} className="animate-spin mb-2" />
+              <span className="text-xs font-bold uppercase tracking-wider">Chargement...</span>
+            </div>
+          ) : reports.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <File size={40} className="mx-auto mb-3 opacity-20" />
+              <p className="text-sm font-bold">Aucun rapport disponible</p>
+            </div>
+          ) : (
+            reports.map((report) => (
+              <div key={report.id} className="group flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black
+                    ${report.report_type === 'WEEKLY' ? 'bg-indigo-50 text-indigo-600' : 'bg-purple-50 text-purple-600'}
+                  `}>
+                    {report.report_type === 'WEEKLY' ? 'H' : 'M'}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-sm">{report.title}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide bg-slate-50 px-2 py-0.5 rounded">
+                        {report.start_date} - {report.end_date}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <a 
+                  href={report.file_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-900 hover:text-white transition-colors"
+                >
+                  <Download size={14} />
+                  <span className="hidden sm:inline">Télécharger</span>
+                </a>
+              </div>
+            ))
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 // --- SUB-COMPONENT: CONFIRMATION MODAL ---
 const ConfirmationModal = ({ 
@@ -96,6 +196,8 @@ export const AttendancesPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedChantierId, setSelectedChantierId] = useState<number | ''>('');
   
+  // Modal States
+  const [isReportsModalOpen, setIsReportsModalOpen] = useState(false);
   const [modalConfig, setModalConfig] = useState<ModalConfig>({
     isOpen: false, type: null, employeeName: '', employeeId: null, attendanceId: undefined
   });
@@ -118,51 +220,25 @@ export const AttendancesPage = () => {
     if (!selectedChantierId) return [];
 
     // --- STRATEGY: Combine Assignments AND Direct Employee List ---
-    
-    // 1. Get employees from Assignments (if any exist)
     const employeesFromAssignments = assignments
       .filter(a => {
         const assignChantierId = typeof a.chantier === 'object' ? a.chantier.id : a.chantier;
         return Number(assignChantierId) === Number(selectedChantierId) && a.is_active !== false;
       })
       .map(a => {
-        // Return either the object inside the assignment OR look it up in the employee list
         if (typeof a.employee === 'object' && a.employee.user) return a.employee;
         return employees.find(e => e.id === Number(a.employee));
       })
       .filter(Boolean);
 
-    // 2. Get employees who are manually linked via 'chantier' field in their profile (if your backend supports this)
-    // OR just include ALL employees if you suspect the assignment link is broken for HR Admin.
-    // ** EDIT HERE: Since you said "don't filter, just appear all", we will be very permissive. **
-    
-    // Let's create a combined list. 
-    // If you want literally ALL employees to show up when a chantier is selected (so you can manually pick):
-    // const potentialEmployees = employees; 
-    
-    // HOWEVER, showing 1000 employees for every chantier is bad UX.
-    // I will assume you want "All employees that MIGHT be related".
-    // Since HR Admin sees them in the Employee List, we use the `employees` array as the source of truth.
-    
-    // MERGE LISTS (Assignments + All Loaded Employees)
-    // We use a Map to avoid duplicates by ID
     const employeeMap = new Map();
 
     // A. Add everyone from the global employee list 
-    // (This ensures HR Admin sees everyone they see in the "Employees" page)
     employees.forEach((emp: any) => {
-       // OPTIONAL: If you only want to show employees who match the chantier ID directly
-       // const empChantierId = typeof emp.chantier === 'object' ? emp.chantier?.id : emp.chantier;
-       // if (Number(empChantierId) === Number(selectedChantierId)) {
-       //    employeeMap.set(emp.id, emp);
-       // }
-       
-       // FOR NOW: We add everyone from the global list because you said "appear all employee"
-       // You can refine this filter if it shows too many people (e.g. office staff)
        employeeMap.set(emp.id, emp);
     });
 
-    // B. Add anyone from assignments (in case they aren't in the global list for some reason)
+    // B. Add anyone from assignments
     employeesFromAssignments.forEach((emp: any) => {
         if (emp && !employeeMap.has(emp.id)) {
             employeeMap.set(emp.id, emp);
@@ -236,12 +312,19 @@ export const AttendancesPage = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 pb-20">
       
+      {/* ACTION MODALS */}
       <AnimatePresence>
         {modalConfig.isOpen && (
           <ConfirmationModal 
             config={modalConfig} 
             onClose={closeModal} 
             onConfirm={handleConfirm} 
+          />
+        )}
+        {isReportsModalOpen && (
+          <ReportsModal 
+            isOpen={isReportsModalOpen}
+            onClose={() => setIsReportsModalOpen(false)}
           />
         )}
       </AnimatePresence>
@@ -265,6 +348,20 @@ export const AttendancesPage = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+              
+              {/* BUTTON: RAPPORTS (NEW) */}
+              <button 
+                onClick={() => setIsReportsModalOpen(true)}
+                className="group bg-slate-900 rounded-2xl border border-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-all duration-300 p-1 flex items-stretch"
+              >
+                 <div className="flex items-center gap-3 px-4 py-2">
+                    <FileText size={18} className="text-slate-400 group-hover:text-white transition-colors" />
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-left">
+                       Rapports <br/> <span className="text-xs text-slate-400">PDF</span>
+                    </span>
+                 </div>
+              </button>
+
               {/* CHANTIER SELECTOR */}
               <div className="group bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 p-1">
                 <div className="flex items-center gap-3 px-4 py-2">

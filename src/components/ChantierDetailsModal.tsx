@@ -9,7 +9,7 @@ import {
 
 import { type Chantier } from '../store/slices/chantierSlice';
 import type { RootState } from '../store/store';
-import { API_ROOT } from '../api/client'; // Import API_ROOT for images
+import { API_ROOT } from '../api/client';
 
 interface Props {
   isOpen: boolean;
@@ -19,23 +19,37 @@ interface Props {
 }
 
 export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Props) => {
-  // Access Clients from Redux to look up the Client Name by ID
   const { items: clients } = useSelector((state: RootState) => state.clients);
 
   if (!chantier) return null;
 
-  // Helper to get Client Name
+  // 1. Client Name Lookup
   const clientName = clients.find(c => c.id === chantier.client)?.company_name || `Client ID #${chantier.client}`;
 
-  // Helper for Image URL
+  // 2. Cover Image Helper
   const imageUrl = chantier.image 
     ? (chantier.image.startsWith('http') ? chantier.image : `${API_ROOT}${chantier.image}`)
     : null;
 
-  // Helper for Document URL
-  const docUrl = chantier.document 
-    ? (chantier.document.startsWith('http') ? chantier.document : `${API_ROOT}${chantier.document}`)
-    : null;
+  // 3. Document Logic: Combine Legacy (single) and New (Array) to ensure everything shows
+  let displayDocuments: { id: number | string, url: string, name: string }[] = [];
+
+  // A. Check for new Array format
+  if (chantier.documents && chantier.documents.length > 0) {
+    displayDocuments = chantier.documents.map((doc, index) => ({
+      id: doc.id || index,
+      url: doc.document.startsWith('http') ? doc.document : `${API_ROOT}${doc.document}`,
+      name: doc.document.split('/').pop() || `Document #${index + 1}`
+    }));
+  } 
+  // B. Fallback: If no array, check for legacy single document
+  else if (chantier.document) {
+    displayDocuments = [{
+      id: 'legacy',
+      url: chantier.document.startsWith('http') ? chantier.document : `${API_ROOT}${chantier.document}`,
+      name: chantier.document.split('/').pop() || 'Document Principal'
+    }];
+  }
 
   return (
     <AnimatePresence>
@@ -58,7 +72,6 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
             
             {/* LEFT SECTION: Visual Identity */}
             <div className="w-full lg:w-96 bg-gradient-to-br from-slate-900 to-slate-800 p-10 flex flex-col items-center text-center text-white shrink-0 relative overflow-hidden">
-              {/* Background decoration */}
               <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
               
               <div className="relative group z-10">
@@ -100,7 +113,6 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
 
             {/* RIGHT SECTION: Data Content */}
             <div className="flex-1 p-8 lg:p-12 overflow-y-auto custom-scrollbar bg-slate-50/50">
-              
               <div className="space-y-10">
                 
                 {/* 1. Project Overview */}
@@ -110,36 +122,29 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
                     <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Détails du Marché</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <DataCard label="Client (Maître d'Ouvrage)" value={clientName} icon={<Building2 size={14}/>} highlight />
+                    <DataCard label="Client" value={clientName} icon={<Building2 size={14}/>} highlight />
                     <DataCard label="Localisation" value={chantier.location} icon={<MapPin size={14}/>} />
                     <DataCard label="Date Signature" value={chantier.contract_date} icon={<Calendar size={14}/>} />
-                    <DataCard 
-                        label="Période Travaux" 
-                        value={`${chantier.start_date} ➝ ${chantier.end_date || 'En cours'}`} 
-                        icon={<Calendar size={14}/>} 
-                    />
+                    <DataCard label="Période" value={`${chantier.start_date} ➝ ${chantier.end_date || 'En cours'}`} icon={<Calendar size={14}/>} />
                   </div>
-                  
-                  {/* Description Box */}
                   <div className="mt-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Description Technique</p>
                       <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                          {chantier.description || "Aucune description technique disponible pour ce projet."}
+                          {chantier.description || "Aucune description technique disponible."}
                       </p>
                   </div>
                 </section>
 
-                {/* 2. Responsibles List */}
+                {/* 2. Responsibles */}
                 <section>
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600"><UserCheck size={20}/></div>
                     <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Équipe Responsable</h3>
                   </div>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {chantier.responsible && chantier.responsible.length > 0 ? (
                         chantier.responsible.map((resp) => (
-                            <div key={resp.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3 group hover:border-indigo-100 transition-colors">
+                            <div key={resp.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3">
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
                                         {resp.first_name[0]}{resp.last_name[0]}
@@ -150,50 +155,49 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
                                     </div>
                                 </div>
                                 <div className="pt-3 border-t border-slate-50 space-y-2">
-                                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                                        <Mail size={12} className="text-slate-300"/> {resp.email}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                                        <Phone size={12} className="text-slate-300"/> {resp.phone_number || "N/A"}
-                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500"><Mail size={12}/> {resp.email}</div>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500"><Phone size={12}/> {resp.phone_number || "N/A"}</div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="col-span-full p-6 bg-slate-100 rounded-2xl text-center text-slate-400 text-sm font-medium italic">
-                            Aucun responsable assigné pour le moment.
-                        </div>
+                        <div className="col-span-full p-6 bg-slate-100 rounded-2xl text-center text-slate-400 text-sm italic">Aucun responsable assigné.</div>
                     )}
                   </div>
                 </section>
 
-                {/* 3. Documents */}
+                {/* 3. DOCUMENTS SECTION (UPDATED) */}
                 <section>
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600"><FileText size={20}/></div>
                     <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Documents Attachés</h3>
                   </div>
                   
-                  {docUrl ? (
-                      <a 
-                        href={docUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="group flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer"
-                      >
-                          <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
-                                  <FileText size={24} />
-                              </div>
-                              <div>
-                                  <p className="font-bold text-slate-800 text-sm">Contrat / Marché Signé</p>
-                                  <p className="text-[10px] text-slate-400 font-medium">Format PDF • Document Officiel</p>
-                              </div>
-                          </div>
-                          <div className="h-10 w-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                              <Download size={18} />
-                          </div>
-                      </a>
+                  {displayDocuments.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {displayDocuments.map((doc, index) => (
+                              <a 
+                                key={doc.id || index}
+                                href={doc.url} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="group flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer"
+                              >
+                                  <div className="flex items-center gap-4 overflow-hidden">
+                                      <div className="h-12 w-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shrink-0">
+                                          <FileText size={24} />
+                                      </div>
+                                      <div className="overflow-hidden">
+                                          <p className="font-bold text-slate-800 text-sm truncate pr-2">{doc.name}</p>
+                                          <p className="text-[10px] text-slate-400 font-medium">Format PDF • Télécharger</p>
+                                      </div>
+                                  </div>
+                                  <div className="h-10 w-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors shrink-0">
+                                      <Download size={18} />
+                                  </div>
+                              </a>
+                          ))}
+                      </div>
                   ) : (
                       <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
                           <p className="text-xs font-bold text-slate-400">Aucun document PDF attaché.</p>
@@ -202,8 +206,8 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
                 </section>
 
               </div>
-
-              {/* Decorative Footer */}
+              
+              {/* Footer */}
               <div className="mt-12 pt-8 border-t border-slate-200 flex justify-between items-center opacity-40">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Projet REF: #{chantier.id}</p>
                 <img src="/pic2.jpeg" alt="Logo" className="h-6 grayscale" />
@@ -217,18 +221,12 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
   );
 };
 
-// --- STYLED COMPONENTS ---
-
 const DataCard = ({ label, value, icon, highlight }: any) => (
   <div className={`p-5 rounded-2xl border transition-all ${highlight ? 'bg-red-50/50 border-red-100' : 'bg-white border-slate-100 shadow-sm'}`}>
     <div className="flex items-center gap-2 mb-1">
       {icon && <span className={highlight ? 'text-red-500' : 'text-slate-400'}>{icon}</span>}
-      <label className={`text-[10px] font-black uppercase tracking-wider ${highlight ? 'text-red-600' : 'text-slate-400'}`}>
-        {label}
-      </label>
+      <label className={`text-[10px] font-black uppercase tracking-wider ${highlight ? 'text-red-600' : 'text-slate-400'}`}>{label}</label>
     </div>
-    <p className={`text-sm font-bold truncate ${highlight ? 'text-red-700 font-mono text-base' : 'text-slate-800'}`}>
-      {value || "---"}
-    </p>
+    <p className={`text-sm font-bold truncate ${highlight ? 'text-red-700 font-mono text-base' : 'text-slate-800'}`}>{value || "---"}</p>
   </div>
 );

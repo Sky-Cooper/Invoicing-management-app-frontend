@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   Plus, Search, MapPin, 
   Edit3, HardHat, Link2, UserCheck,
-  BadgeCheck, Hash, Briefcase
+  BadgeCheck, Hash, Briefcase, Trash2, AlertTriangle, X 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Store & Slices
 import type { AppDispatch, RootState } from '../store/store';
-import { fetchChantiers, type Chantier } from '../store/slices/chantierSlice';
+import { fetchChantiers, deleteChantier, type Chantier } from '../store/slices/chantierSlice';
 import { fetchEmployees } from '../store/slices/employeeSlice';
 
 // Composants Modaux
@@ -28,8 +28,12 @@ export const ChantiersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   
   // --- STATE MODALS ---
-  const [isFormOpen, setIsFormOpen] = useState(false); // For Create/Edit
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false); // For Viewing Details
+  const [isFormOpen, setIsFormOpen] = useState(false); 
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
+  // --- DELETE MODAL STATE ---
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [chantierToDelete, setChantierToDelete] = useState<number | null>(null);
   
   const [selectedChantier, setSelectedChantier] = useState<Chantier | null>(null);
 
@@ -57,6 +61,25 @@ export const ChantiersPage = () => {
     setIsDetailsOpen(true);
   };
 
+  // --- DELETE HANDLERS ---
+  const handleDeleteClick = (id: number) => {
+    setChantierToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (chantierToDelete) {
+      dispatch(deleteChantier(chantierToDelete));
+      setIsDeleteModalOpen(false);
+      setChantierToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setChantierToDelete(null);
+  };
+
   // --- FILTERS & HELPERS ---
 
   const filteredChantiers = chantiers.filter(c => 
@@ -71,7 +94,6 @@ export const ChantiersPage = () => {
     return `${API_ROOT}${imagePath}`;
   };
 
-  // Helper to safely format responsible names
   const formatResponsibles = (chantier: Chantier) => {
     if (!chantier.responsible || !Array.isArray(chantier.responsible) || chantier.responsible.length === 0) {
         return "Non assigné";
@@ -166,15 +188,12 @@ export const ChantiersPage = () => {
                       <label className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
                         <UserCheck size={12} /> Responsables
                       </label>
-                      
-                      {/* --- FIXED RESPONSIBLE DISPLAY --- */}
                       <div 
                         className="text-[13px] font-bold text-slate-700 truncate pl-3 border-l-2 border-red-100" 
                         title={formatResponsibles(chantier)}
                       >
                         {formatResponsibles(chantier)}
                       </div>
-
                     </div>
                   </div>
                   
@@ -191,7 +210,6 @@ export const ChantiersPage = () => {
                   {/* ACTIONS */}
                   <div className="flex items-center gap-3 mt-auto">
                     
-                    {/* DETAILS BUTTON */}
                     <button 
                       onClick={() => handleOpenDetails(chantier)}
                       className="h-12 w-12 flex items-center justify-center bg-red-600 text-white rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-700 hover:-translate-y-1 transition-all active:scale-95"
@@ -199,8 +217,16 @@ export const ChantiersPage = () => {
                     >
                       <Link2 size={20} strokeWidth={2.5} />
                     </button>
+
+                    {/* DELETE BUTTON - Opens Modal */}
+                    <button 
+                        onClick={() => handleDeleteClick(chantier.id)}
+                        className="h-12 w-12 flex items-center justify-center border-2 border-red-50 text-red-300 rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all active:scale-95"
+                        title="Supprimer le Chantier"
+                    >
+                        <Trash2 size={20} />
+                    </button>
                     
-                    {/* EDIT BUTTON */}
                     <button 
                       onClick={() => handleOpenEdit(chantier)}
                       className="h-12 flex-1 flex items-center justify-center gap-2 border-2 border-slate-100 text-slate-500 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-slate-50 hover:text-red-600 hover:border-red-100 transition-all"
@@ -229,10 +255,55 @@ export const ChantiersPage = () => {
         onClose={() => setIsDetailsOpen(false)}
         chantier={selectedChantier}
         onEdit={(chantier) => {
-            setIsDetailsOpen(false); // Close details
-            handleOpenEdit(chantier); // Open edit
+            setIsDetailsOpen(false);
+            handleOpenEdit(chantier);
         }}
       />
+
+      {/* 3. CONFIRM DELETE MODAL */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              onClick={cancelDelete}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl flex flex-col items-center text-center gap-6"
+            >
+              <div className="h-20 w-20 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-2">
+                <AlertTriangle size={40} strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">Supprimer le projet ?</h3>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                  Cette action est irréversible. Toutes les données, documents et historiques liés à ce chantier seront effacés.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 w-full">
+                <button 
+                  onClick={cancelDelete}
+                  className="py-4 rounded-xl font-bold text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  onClick={confirmDelete}
+                  className="py-4 rounded-xl font-bold text-xs uppercase tracking-widest bg-red-600 text-white shadow-lg shadow-red-500/30 hover:bg-red-700 hover:shadow-red-600/40 transition-all"
+                >
+                  Confirmer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

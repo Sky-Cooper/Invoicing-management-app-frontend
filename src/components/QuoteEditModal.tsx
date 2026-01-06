@@ -1,16 +1,14 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   X, Save, BadgeCheck, FileEdit, Loader2,
-  ShieldBan, User, HardHat, Briefcase,
-  Trash2, Box, ChevronDown, Plus, Clock, Hash, Calendar
+  ShieldBan, Briefcase, Trash2, Plus, Hash
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
 
 // Redux Actions & Types
-import { updateQuote, type Quote, type QuoteItem, type UpdateQuotePayload } from '../store/slices/quoteSlice';
+import { updateQuote, type Quote, type UpdateQuotePayload } from '../store/slices/quoteSlice';
 import { fetchClients } from '../store/slices/clientSlice';
-import { fetchChantiers } from '../store/slices/chantierSlice';
 
 interface Props {
   isOpen: boolean;
@@ -18,7 +16,6 @@ interface Props {
   quote: Quote | null;
 }
 
-const UNIT_TYPES = ["u", "m", "m2", "m3", "kg", "t", "h", "j", "ens", "forfait"] as const;
 type QuoteStatus = 'DRAFT' | 'SENT' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED';
 
 export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
@@ -26,14 +23,14 @@ export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
   
   // Data from Store
   const { items: clients } = useAppSelector((state) => state.clients);
-  const { items: chantiers } = useAppSelector((state) => state.chantiers);
+  // Chantier selector removed
   const { isLoading } = useAppSelector((state) => state.quotes);
 
   // --- LOCAL STATE ---
   const [formData, setFormData] = useState<UpdateQuotePayload>({
     quote_number: '',
     client: 0,
-    chantier: 0,
+    chantier: 0, // Hidden/Defaulted to 0
     project_description: '', 
     issued_date: '',
     valid_until: '',
@@ -46,21 +43,21 @@ export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
     if (isOpen) {
         // Ensure dropdowns are populated
         if (!clients || clients.length === 0) dispatch(fetchClients());
-        if (!chantiers || chantiers.length === 0) dispatch(fetchChantiers());
+        // fetchChantiers dispatch removed
 
         // Populate Form
         if (quote) {
             setFormData({
                 quote_number: quote.quote_number,
                 client: quote.client,
-                chantier: quote.chantier,
+                chantier: 0, // Ignored in UI
                 project_description: quote.project_description || '', 
                 issued_date: quote.issued_date ? quote.issued_date.split('T')[0] : '',
                 valid_until: quote.valid_until ? quote.valid_until.split('T')[0] : '',
                 status: quote.status,
                 items: quote.items.map(item => ({
                     ...item,
-                    item: item.item || undefined, // Handle product link if exists
+                    item: item.item || undefined, 
                     quantity: item.quantity,
                     unit_price: item.unit_price,
                     subtotal: item.subtotal,
@@ -113,7 +110,7 @@ export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
     const payload: UpdateQuotePayload = {
       ...formData,
       client: Number(formData.client),
-      chantier: Number(formData.chantier),
+      chantier: 0, // Always send 0
       // Ensure items are mapped correctly for the backend
       items: formData.items?.map(item => ({
         ...item,
@@ -176,87 +173,82 @@ export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
             {/* LEFT: SETTINGS */}
             <div className="lg:col-span-4 space-y-6">
                <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm h-full flex flex-col gap-6">
-                  
-                  {/* Status Selector */}
-                  <div>
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Statut du Devis</label>
-                      <select 
-                        value={formData.status} 
-                        onChange={(e) => setFormData({...formData, status: e.target.value as QuoteStatus})}
-                        className="w-full bg-slate-100 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm text-slate-900 outline-none focus:border-slate-900 cursor-pointer"
-                      >
-                          <option value="DRAFT">Brouillon</option>
-                          <option value="SENT">Envoyé</option>
-                          <option value="ACCEPTED">Accepté</option>
-                          <option value="REJECTED">Refusé</option>
-                          <option value="EXPIRED">Expiré</option>
-                      </select>
-                  </div>
+                 
+                 {/* Status Selector */}
+                 <div>
+                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Statut du Devis</label>
+                     <select 
+                       value={formData.status} 
+                       onChange={(e) => setFormData({...formData, status: e.target.value as QuoteStatus})}
+                       className="w-full bg-slate-100 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm text-slate-900 outline-none focus:border-slate-900 cursor-pointer"
+                     >
+                         <option value="DRAFT">Brouillon</option>
+                         <option value="SENT">Envoyé</option>
+                         <option value="ACCEPTED">Accepté</option>
+                         <option value="REJECTED">Refusé</option>
+                         <option value="EXPIRED">Expiré</option>
+                     </select>
+                 </div>
 
-                  <div>
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                          <Hash size={12} /> N° Devis
-                      </label>
-                      <input value={formData.quote_number} readOnly className="w-full bg-slate-50 border-2 border-slate-100 text-slate-500 rounded-xl py-4 px-6 font-mono font-black text-sm outline-none cursor-not-allowed" />
-                  </div>
+                 <div>
+                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                         <Hash size={12} /> N° Devis
+                     </label>
+                     <input value={formData.quote_number} readOnly className="w-full bg-slate-50 border-2 border-slate-100 text-slate-500 rounded-xl py-4 px-6 font-mono font-black text-sm outline-none cursor-not-allowed" />
+                 </div>
 
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-4">
-                      <div>
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Émission</label>
-                          <input type="date" value={formData.issued_date} onChange={(e) => setFormData({...formData, issued_date: e.target.value})} className="w-full bg-slate-50 rounded-xl py-3 px-4 font-bold text-xs outline-none" />
-                      </div>
-                      <div>
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Validité</label>
-                          <input type="date" value={formData.valid_until} onChange={(e) => setFormData({...formData, valid_until: e.target.value})} className="w-full bg-slate-50 rounded-xl py-3 px-4 font-bold text-xs outline-none" />
-                      </div>
-                  </div>
+                 {/* Dates */}
+                 <div className="grid grid-cols-2 gap-4">
+                     <div>
+                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Émission</label>
+                         <input type="date" value={formData.issued_date} onChange={(e) => setFormData({...formData, issued_date: e.target.value})} className="w-full bg-slate-50 rounded-xl py-3 px-4 font-bold text-xs outline-none" />
+                     </div>
+                     <div>
+                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Validité</label>
+                         <input type="date" value={formData.valid_until} onChange={(e) => setFormData({...formData, valid_until: e.target.value})} className="w-full bg-slate-50 rounded-xl py-3 px-4 font-bold text-xs outline-none" />
+                     </div>
+                 </div>
 
-                  {/* Client & Chantier */}
-                  <div className="space-y-4">
-                      <div>
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Client</label>
-                          <select value={formData.client} onChange={(e) => setFormData({...formData, client: Number(e.target.value)})} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 font-bold text-xs outline-none">
-                              {clients.map(c => <option key={c.id} value={c.id}>{c.name || c.contact_person || c.company_name}</option>)}
-                          </select>
-                      </div>
-                      <div>
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Chantier</label>
-                          <select value={formData.chantier} onChange={(e) => setFormData({...formData, chantier: Number(e.target.value)})} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 font-bold text-xs outline-none">
-                              {chantiers.map(ch => <option key={ch.id} value={ch.id}>{ch.name}</option>)}
-                          </select>
-                      </div>
-                  </div>
+                 {/* Client Selection Only */}
+                 <div className="space-y-4">
+                     <div>
+                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Client</label>
+                         <select value={formData.client} onChange={(e) => setFormData({...formData, client: Number(e.target.value)})} className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 font-bold text-xs outline-none">
+                             {clients.map(c => <option key={c.id} value={c.id}>{c.name || c.contact_person || c.company_name}</option>)}
+                         </select>
+                     </div>
+                     {/* Chantier removed */}
+                 </div>
 
-                  <div className="flex-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Briefcase size={12}/> Description</label>
-                      <textarea value={formData.project_description} onChange={(e) => setFormData({...formData, project_description: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-medium text-slate-600 h-32 outline-none resize-none" />
-                  </div>
+                 <div className="flex-1">
+                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Briefcase size={12}/> Description</label>
+                     <textarea value={formData.project_description} onChange={(e) => setFormData({...formData, project_description: e.target.value})} className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-medium text-slate-600 h-32 outline-none resize-none" />
+                 </div>
                </div>
             </div>
 
             {/* RIGHT: ITEMS */}
             <div className="lg:col-span-8 space-y-6">
                <div className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm flex flex-col">
-                  <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-                      <h3 className="font-black text-slate-800 uppercase text-xs tracking-widest flex items-center gap-2"><BadgeCheck size={16}/> Lignes du devis</h3>
-                      <button type="button" onClick={addItem} className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-lg"><Plus size={12} /> Ajouter</button>
-                  </div>
+                 <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                     <h3 className="font-black text-slate-800 uppercase text-xs tracking-widest flex items-center gap-2"><BadgeCheck size={16}/> Lignes du devis</h3>
+                     <button type="button" onClick={addItem} className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-lg"><Plus size={12} /> Ajouter</button>
+                 </div>
 
-                  <div className="p-6 space-y-4">
-                      {formData.items?.map((item, index) => (
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pb-4 border-b border-slate-50 last:border-0">
-                          <div className="md:col-span-5 space-y-1">
-                              <input value={item.item_name} onChange={(e) => handleItemChange(index, 'item_name', e.target.value)} placeholder="Nom" className="w-full bg-slate-50 rounded-lg py-2 px-3 text-sm font-bold outline-none" />
-                              <input value={item.item_description} onChange={(e) => handleItemChange(index, 'item_description', e.target.value)} placeholder="Description" className="w-full bg-transparent text-xs text-slate-400 outline-none px-1" />
-                          </div>
-                          <div className="md:col-span-2"><input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} className="w-full bg-slate-50 rounded-lg py-2 text-center text-sm font-bold outline-none" placeholder="Qté" /></div>
-                          <div className="md:col-span-2"><input type="number" value={item.unit_price} onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)} className="w-full bg-slate-50 rounded-lg py-2 text-right px-3 text-sm font-bold outline-none" placeholder="Prix" /></div>
-                          <div className="md:col-span-2 text-right pt-2 font-black text-sm text-slate-700">{item.subtotal} DH</div>
-                          <div className="md:col-span-1 flex justify-center pt-2"><button type="button" onClick={() => removeItem(index)} className="text-slate-300 hover:text-red-500"><Trash2 size={16}/></button></div>
-                        </div>
-                      ))}
-                  </div>
+                 <div className="p-6 space-y-4">
+                     {formData.items?.map((item, index) => (
+                       <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start pb-4 border-b border-slate-50 last:border-0">
+                         <div className="md:col-span-5 space-y-1">
+                             <input value={item.item_name} onChange={(e) => handleItemChange(index, 'item_name', e.target.value)} placeholder="Nom" className="w-full bg-slate-50 rounded-lg py-2 px-3 text-sm font-bold outline-none" />
+                             <input value={item.item_description} onChange={(e) => handleItemChange(index, 'item_description', e.target.value)} placeholder="Description" className="w-full bg-transparent text-xs text-slate-400 outline-none px-1" />
+                         </div>
+                         <div className="md:col-span-2"><input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} className="w-full bg-slate-50 rounded-lg py-2 text-center text-sm font-bold outline-none" placeholder="Qté" /></div>
+                         <div className="md:col-span-2"><input type="number" value={item.unit_price} onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)} className="w-full bg-slate-50 rounded-lg py-2 text-right px-3 text-sm font-bold outline-none" placeholder="Prix" /></div>
+                         <div className="md:col-span-2 text-right pt-2 font-black text-sm text-slate-700">{item.subtotal} DH</div>
+                         <div className="md:col-span-1 flex justify-center pt-2"><button type="button" onClick={() => removeItem(index)} className="text-slate-300 hover:text-red-500"><Trash2 size={16}/></button></div>
+                       </div>
+                     ))}
+                 </div>
                </div>
 
                {/* TOTALS */}

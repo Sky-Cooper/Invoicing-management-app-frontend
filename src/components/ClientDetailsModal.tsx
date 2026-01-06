@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Edit3, Building2, Mail, Phone, MapPin, 
   Fingerprint, Briefcase, Globe, Hash, ShieldCheck, 
-  Calendar, ExternalLink, User
+  Calendar, ExternalLink, User, FileText, Download 
 } from 'lucide-react';
 import { type Client } from '../store/slices/clientSlice';
+import { API_ROOT } from '../api/client'; // Import for document URLs
 
 interface Props {
   isOpen: boolean;
@@ -40,7 +41,11 @@ export const ClientDetailsModal = ({ isOpen, onClose, client, onEdit }: Props) =
             <div className="w-full lg:w-80 bg-gradient-to-br from-red-600 to-red-800 p-10 flex flex-col items-center text-center text-white shrink-0">
               <div className="relative group">
                 <div className="w-32 h-32 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center overflow-hidden border-4 border-white/20">
-                   <img src="/pic2.jpeg" alt="Logo" className="w-full h-full object-cover" />
+                   {client.logo ? (
+                      <img src={client.logo.startsWith('http') ? client.logo : `${API_ROOT}${client.logo}`} alt="Logo" className="w-full h-full object-cover" />
+                   ) : (
+                      <img src="/pic2.jpeg" alt="Default Logo" className="w-full h-full object-cover opacity-50" />
+                   )}
                 </div>
                 <div className="absolute -bottom-2 -right-2 bg-emerald-500 p-2 rounded-full border-4 border-red-700">
                   <ShieldCheck size={20} />
@@ -129,6 +134,53 @@ export const ClientDetailsModal = ({ isOpen, onClose, client, onEdit }: Props) =
                         </button>
                     </div>
                   </div>
+                </section>
+
+                {/* 4. Documents Attachés (NEW SECTION) */}
+                <section>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-blue-100 rounded-lg text-blue-600"><FileText size={20}/></div>
+                    <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Documents Attachés</h3>
+                  </div>
+
+                  {/* @ts-ignore - Assuming client.documents exists based on request */}
+                  {client.documents && client.documents.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* @ts-ignore */}
+                          {client.documents.map((doc: any, index: number) => {
+                              // Build URL
+                              const docUrl = doc.document.startsWith('http') ? doc.document : `${API_ROOT}${doc.document}`;
+                              const fileName = doc.document.split('/').pop() || `Document #${index + 1}`;
+                              
+                              return (
+                                  <a 
+                                    key={doc.id || index}
+                                    href={docUrl} 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="group flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all cursor-pointer"
+                                  >
+                                      <div className="flex items-center gap-4 overflow-hidden">
+                                          <div className="h-12 w-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                                              <FileText size={24} />
+                                          </div>
+                                          <div className="overflow-hidden">
+                                              <p className="font-bold text-slate-800 text-sm truncate pr-2">{fileName}</p>
+                                              <p className="text-[10px] text-slate-400 font-medium">Format PDF • Télécharger</p>
+                                          </div>
+                                      </div>
+                                      <div className="h-10 w-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-colors shrink-0">
+                                          <Download size={18} />
+                                      </div>
+                                  </a>
+                              );
+                          })}
+                      </div>
+                  ) : (
+                      <div className="p-6 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
+                          <p className="text-xs font-bold text-slate-400">Aucun document attaché à ce client.</p>
+                      </div>
+                  )}
                 </section>
 
               </div>

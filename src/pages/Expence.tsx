@@ -6,7 +6,7 @@ import {
   Loader2, ArrowUpRight, TrendingDown, 
   ChevronDown, Building2, AlertCircle, CheckCircle2,
   Tags, Truck, Hammer, HardHat, Users, 
-  Upload, Image as ImageIcon, Trash2, Eye 
+  Upload, Image as ImageIcon, Trash2, Eye, Copy 
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
 import { fetchExpenses, addExpense, updateExpense } from '../store/slices/expensesSlice'; 
@@ -19,7 +19,6 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 const getFullImageUrl = (path: string | null | undefined): string | undefined => {
   if (!path) return undefined; 
   if (path.startsWith('http')) return path; 
-  // Ensure we don't double slash
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   return `${API_BASE_URL}${cleanPath}`;
 };
@@ -67,6 +66,7 @@ export const ExpensesPage = () => {
   
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  // --- MODALS STATES ---
   const [viewModal, setViewModal] = useState<{ isOpen: boolean; expense: any | null }>({
     isOpen: false,
     expense: null
@@ -75,6 +75,9 @@ export const ExpensesPage = () => {
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean; type: 'success' | 'error'; title: string; message: string;
   }>({ isOpen: false, type: 'success', title: '', message: '' });
+
+  // NEW: State for the Total Amount Modal
+  const [isTotalModalOpen, setIsTotalModalOpen] = useState(false);
 
   const [formData, setFormData] = useState<ExpenseFormData>({
     chantier: '', 
@@ -111,7 +114,6 @@ export const ExpensesPage = () => {
     setIsEditing(true);
     setEditId(exp.id);
     
-    // Determine Chantier ID (Handle object or ID)
     const chantierId = typeof exp.chantier === 'object' ? exp.chantier?.id : exp.chantier;
 
     setFormData({
@@ -121,10 +123,9 @@ export const ExpensesPage = () => {
       amount: exp.amount.toString(),
       description: exp.description || '',
       expense_date: exp.expense_date,
-      image: null, // Reset file input
+      image: null, 
     });
     
-    // ✅ FIX: Use 'document' field from backend for preview
     if (exp.document) {
         setPreviewUrl(getFullImageUrl(exp.document) || null);
     } else {
@@ -199,7 +200,7 @@ export const ExpensesPage = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 pb-20 relative">
       
-      {/* FEEDBACK MODAL */}
+      {/* 1. FEEDBACK MODAL */}
       <AnimatePresence>
         {feedbackModal.isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -222,7 +223,54 @@ export const ExpensesPage = () => {
         )}
       </AnimatePresence>
 
-      {/* VIEW DETAILS MODAL */}
+      {/* 2. TOTAL AMOUNT MODAL (NEW) */}
+      <AnimatePresence>
+        {isTotalModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setIsTotalModalOpen(false)} 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.9, y: 20 }} 
+              className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl relative z-10 overflow-hidden"
+            >
+              <div className="p-10 text-center space-y-8">
+                 <div className="flex flex-col items-center gap-4">
+                    <div className="h-24 w-24 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-2 shadow-inner">
+                        <TrendingDown size={48} strokeWidth={2.5} />
+                    </div>
+                    <div className="space-y-1">
+                        <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.25em]">Total des Sorties</h3>
+                        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Montant Global Cumulé</p>
+                    </div>
+                 </div>
+
+                 {/* The Big Number */}
+                 <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100">
+                    <p className="text-4xl sm:text-5xl font-black text-slate-900 break-all leading-tight">
+                        {formatMoney(totalExpenses)} <span className="text-lg text-slate-400 font-bold">DH</span>
+                    </p>
+                 </div>
+
+                 <button 
+                    onClick={() => setIsTotalModalOpen(false)}
+                    className="w-full py-5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black uppercase text-xs tracking-widest transition-all shadow-xl hover:shadow-2xl"
+                 >
+                    Fermer
+                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 3. VIEW DETAILS MODAL */}
       <AnimatePresence>
         {viewModal.isOpen && viewModal.expense && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -241,26 +289,24 @@ export const ExpensesPage = () => {
               </div>
               <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Chantier</p>
-                        <div className="flex items-center gap-2 text-slate-700 font-bold">
-                            <Building2 size={16} className="text-slate-400" />
-                            {/* Handle if chantier is object or ID */}
-                            {typeof viewModal.expense.chantier === 'object' ? viewModal.expense.chantier.name : `ID: ${viewModal.expense.chantier}`}
-                        </div>
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ajouté par</p>
-                        <div className="flex items-center gap-2 text-slate-700 font-bold">
-                            <Users size={16} className="text-slate-400" />
-                            {/* Attempt to show Creator Name */}
-                            {viewModal.expense.created_by ? 
-                                (typeof viewModal.expense.created_by === 'object' 
-                                    ? `${viewModal.expense.created_by.first_name || ''} ${viewModal.expense.created_by.last_name || ''}`
-                                    : 'Utilisateur #' + viewModal.expense.created_by) 
-                                : 'Système'}
-                        </div>
-                    </div>
+                   <div>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Chantier</p>
+                       <div className="flex items-center gap-2 text-slate-700 font-bold">
+                           <Building2 size={16} className="text-slate-400" />
+                           {typeof viewModal.expense.chantier === 'object' ? viewModal.expense.chantier.name : `ID: ${viewModal.expense.chantier}`}
+                       </div>
+                   </div>
+                   <div>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ajouté par</p>
+                       <div className="flex items-center gap-2 text-slate-700 font-bold">
+                           <Users size={16} className="text-slate-400" />
+                           {viewModal.expense.created_by ? 
+                               (typeof viewModal.expense.created_by === 'object' 
+                                   ? `${viewModal.expense.created_by.first_name || ''} ${viewModal.expense.created_by.last_name || ''}`
+                                   : 'Utilisateur #' + viewModal.expense.created_by) 
+                               : 'Système'}
+                       </div>
+                   </div>
                  </div>
                  {viewModal.expense.description && (
                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
@@ -271,7 +317,6 @@ export const ExpensesPage = () => {
                  <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><ImageIcon size={14} />Justificatif (Reçu)</p>
                     <div className="rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 min-h-[200px] flex items-center justify-center relative group">
-                        {/* ✅ FIX: Use 'document' instead of 'image' */}
                         {viewModal.expense.document ? (
                             <img src={getFullImageUrl(viewModal.expense.document)} alt="Reçu" className="w-full h-auto object-contain max-h-[400px]" />
                         ) : (
@@ -306,7 +351,6 @@ export const ExpensesPage = () => {
                 .map((exp, idx) => {
                   const style = getCategoryStyle(exp.category);
                   const Icon = style.icon;
-                  // Handle chantier safely
                   const chantierName = typeof exp.chantier === 'object' ? exp.chantier.name : 'N/A';
 
                   return (
@@ -443,13 +487,19 @@ export const ExpensesPage = () => {
 
         {/* 3. RIGHT: WIDGETS */}
         <div className="lg:col-span-3 space-y-8 sticky top-8 text-left">
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+          {/* UPDATED WIDGET: CLICKABLE TO SHOW FULL AMOUNT */}
+          <div 
+            onClick={() => setIsTotalModalOpen(true)}
+            className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 cursor-pointer hover:border-rose-300 hover:shadow-md transition-all group"
+          >
               <div className="flex items-center gap-2 mb-6">
-                <div className="p-2 bg-rose-50 rounded-lg"><TrendingDown size={16} className="text-rose-500" /></div>
-                <h3 className="font-black text-xs uppercase tracking-widest text-slate-400">Total Sorties</h3>
+                <div className="p-2 bg-rose-50 rounded-lg group-hover:bg-rose-100 transition-colors"><TrendingDown size={16} className="text-rose-500" /></div>
+                <h3 className="font-black text-xs uppercase tracking-widest text-slate-400 group-hover:text-rose-500 transition-colors">Total Sorties</h3>
               </div>
               <div className="space-y-1">
-                <p className="text-3xl font-black text-slate-900">{formatMoney(totalExpenses)} <small className="text-sm text-slate-400 font-medium">DH</small></p>
+                <p className="text-3xl font-black text-slate-900 truncate" title="Cliquez pour voir le montant complet">
+                    {formatMoney(totalExpenses)} <small className="text-sm text-slate-400 font-medium">DH</small>
+                </p>
               </div>
           </div>
         </div>

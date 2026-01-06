@@ -30,24 +30,28 @@ import { PurchaseOrdersPage } from './pages/PurchaseOrdersPage';
 // --- RH (RESSOURCES HUMAINES) ---
 import { AttendancesPage } from './pages/AttendancesPage';
 import { ContractsPage } from './pages/ContractsPage'; 
-import { EOSBPage } from './pages/EOSBPage'; // <--- NEW IMPORT
+import { EOSBPage } from './pages/EOSBPage'; 
 import { PaymentsPage } from './pages/Paiement';
 
-// --- DÉPENSES ---
+// --- DÉPENSES & CHARGES ---
 import { ExpensesPage } from './pages/Expence';
+import FixedChargesPage from './pages/FixedChargesPage'; // <--- IMPORT ADDED
 
 // --- COMPOSANT DE CHARGEMENT AUTOMATIQUE ---
 const ProfileLoader = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useAppDispatch();
   const accessToken = useAppSelector((state) => state.auth.accessToken); 
+  // We read these values to check them, but we do NOT include them in the dependency array
   const { data: userProfile, isLoading } = useAppSelector((state) => state.profile);
 
   useEffect(() => {
+    // Check if we have a token, but no profile data yet, and we aren't currently loading
     if (accessToken && !userProfile && !isLoading) {
       console.log("Extraction des données de l'entreprise depuis le profil...");
       dispatch(fetchProfile());
     }
-  }, [accessToken, userProfile, isLoading, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, dispatch]); 
 
   return <>{children}</>;
 };
@@ -119,7 +123,7 @@ function App() {
                  </DashboardLayout>
                } />
 
-               {/* NEW: SOLDE DE TOUT COMPTE (EOSB) */}
+               {/* SOLDE DE TOUT COMPTE (EOSB) */}
                <Route path="/eosb" element={
                  <DashboardLayout>
                    <EOSBPage />
@@ -165,10 +169,16 @@ function App() {
                  </DashboardLayout>
                } />
 
-               {/* DÉPENSES */}
+               {/* DÉPENSES & CHARGES FIXES */}
                <Route path="/expenses" element={
                  <DashboardLayout>
                    <ExpensesPage />
+                 </DashboardLayout>
+               } />
+
+               <Route path="/fixed-charges" element={ // <--- ROUTE ADDED
+                 <DashboardLayout>
+                   <FixedChargesPage />
                  </DashboardLayout>
                } />
 

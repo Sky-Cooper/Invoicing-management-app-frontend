@@ -2,11 +2,16 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { 
   X, Save, BadgeCheck, FileEdit, Loader2,
   ShieldBan, User, HardHat, Briefcase, FileText,
-  Box, AlertCircle, ChevronDown, Lock // Replaced Plus/Trash with Lock
+  Box, AlertCircle, ChevronDown, Lock
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
+
+// --- IMPORT ACTIONS TO FETCH DATA ---
 import { updateInvoice, type Invoice } from '../store/slices/invoiceSlice';
+import { fetchClients } from '../store/slices/clientSlice';
+import { fetchChantiers } from '../store/slices/chantierSlice';
+import { fetchItems } from '../store/slices/itemSlice';
 
 interface Props {
   isOpen: boolean;
@@ -16,16 +21,25 @@ interface Props {
 
 const UNIT_TYPES = ["day", "bag", "M", "unité", "heure", "m²", "m³", "kg", "ton"] as const;
 
-// Keeping types compatible with backend, but we will only use DRAFT and PAID in UI
 type InvoiceStatus = 'DRAFT' | 'SENT' | 'PAID' | 'CANCELLED';
 
 export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
   const dispatch = useAppDispatch();
   
-  // Data from Store
-  const { items: clients } = useAppSelector((state) => state.clients);
-  const { items: chantiers } = useAppSelector((state) => state.chantiers);
+  // 1. DATA FROM STORE (Safe Selectors)
+  const clients = useAppSelector((state) => state.clients?.items || []);
+  const chantiers = useAppSelector((state) => state.chantiers?.items || []);
+  const catalogItems = useAppSelector((state) => state.items?.items || []);
   const { isLoading } = useAppSelector((state) => state.invoices);
+
+  // 2. FORCE DATA FETCH ON OPEN (Fixes the "Missing Info" bug)
+  useEffect(() => {
+    if (isOpen) {
+        dispatch(fetchClients());
+        dispatch(fetchChantiers());
+        dispatch(fetchItems());
+    }
+  }, [isOpen, dispatch]);
 
   // --- LOCAL STATE ---
   const [formData, setFormData] = useState({
@@ -45,7 +59,7 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
 
   const [items, setItems] = useState<any[]>([]);
 
-  // --- LOAD DATA ---
+  // --- 3. LOAD INVOICE DATA INTO FORM ---
   useEffect(() => {
     if (invoice && isOpen) {
       
@@ -86,6 +100,41 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
     }
   }, [invoice, isOpen]);
 
+  // --- SMART LINKING LOGIC (Same as Create Form) ---
+
+  // Filter Projects based on Selected Client
+  const availableChantiers = useMemo(() => {
+    if (!formData.client) return chantiers; 
+    return chantiers.filter(c => c.client === Number(formData.client));
+  }, [chantiers, formData.client]);
+
+  // Handle Client Change
+  const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData(prev => ({
+        ...prev,
+        client: e.target.value,
+        chantier: '', 
+        contract_number: ''
+    }));
+  };
+
+  // Handle Project Change
+  const handleChantierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    const selectedChantier = chantiers.find(c => c.id === Number(selectedId));
+
+    if (selectedChantier) {
+        setFormData(prev => ({
+            ...prev,
+            chantier: selectedId,
+            client: String(selectedChantier.client), 
+            contract_number: selectedChantier.contract_number
+        }));
+    } else {
+        setFormData(prev => ({ ...prev, chantier: selectedId }));
+    }
+  };
+
   // --- CALCULATIONS ---
   const totals = useMemo(() => {
     const subtotal = items.reduce((acc, item) => acc + (parseFloat(item.quantity || '0') * parseFloat(item.unit_price || '0')), 0);
@@ -114,7 +163,6 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
       chantier: parseInt(formData.chantier),
       Subject: formData.Subject,
       notes: formData.notes,
-      // We pass items back exactly as they are since they are immutable in this view
       items: items.map(item => ({
         item_id: item.item_id ? parseInt(item.item_id) : null,
         item_name: item.item_name,
@@ -180,12 +228,13 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
                       />
                   </div>
 
+                  {/* CLIENT SELECTION */}
                   <div>
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                           <User size={12} /> Client Facturé
                       </label>
                       <div className="relative">
-                          <select required value={formData.client} onChange={(e) => setFormData({...formData, client: e.target.value})}
+                          <select required value={formData.client} onChange={handleClientChange}
                               className="w-full bg-slate-50 border border-slate-100 rounded-xl py-4 pl-4 pr-10 font-bold text-sm text-slate-800 outline-none focus:border-red-500 appearance-none cursor-pointer">
                               <option value="">Sélectionner...</option>
                               {clients.map(c => <option key={c.id} value={c.id}>{c.company_name}</option>)}
@@ -194,15 +243,16 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
                       </div>
                   </div>
 
+                  {/* PROJECT SELECTION (Filtered by availableChantiers) */}
                   <div>
                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                           <HardHat size={12} /> Projet Lié
                       </label>
                       <div className="relative">
-                          <select required value={formData.chantier} onChange={(e) => setFormData({...formData, chantier: e.target.value})}
+                          <select required value={formData.chantier} onChange={handleChantierChange}
                               className="w-full bg-slate-50 border border-slate-100 rounded-xl py-4 pl-4 pr-10 font-bold text-sm text-slate-800 outline-none focus:border-red-500 appearance-none cursor-pointer">
                               <option value="">Sélectionner...</option>
-                              {chantiers.map(ch => <option key={ch.id} value={ch.id}>{ch.name}</option>)}
+                              {availableChantiers.map(ch => <option key={ch.id} value={ch.id}>{ch.name}</option>)}
                           </select>
                           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                       </div>
@@ -230,13 +280,17 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
                         className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-medium text-slate-600 h-24 outline-none focus:bg-white focus:border-red-500 transition-all resize-none" />
                   </div>
 
-                  <div>
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                          <FileText size={12} /> N° Contrat
-                      </label>
-                      <input required value={formData.contract_number} onChange={(e) => setFormData({...formData, contract_number: e.target.value})}
-                          className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-red-500" />
-                  </div>
+                  {/* --- CONDITIONAL CONTRACT NUMBER --- */}
+                  {formData.chantier && (
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                              <FileText size={12} /> N° Contrat
+                          </label>
+                          <input required value={formData.contract_number} onChange={(e) => setFormData({...formData, contract_number: e.target.value})}
+                              className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-red-500" />
+                      </div>
+                  )}
+
                </div>
             </div>
 
@@ -249,7 +303,6 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
                       <h3 className="font-black text-slate-800 uppercase text-xs tracking-widest flex items-center gap-2">
                           <BadgeCheck size={16} className="text-red-600"/> Lignes de prestations (Verrouillées)
                       </h3>
-                      {/* --- ADD BUTTON REMOVED FOR IMMUTABILITY --- */}
                       <span className="flex items-center gap-2 bg-slate-100 text-slate-400 px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest cursor-not-allowed">
                           <Lock size={12} /> Modification Interdite
                       </span>
@@ -275,7 +328,6 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
                                   disabled
                                   className="w-full bg-slate-100/50 border border-transparent rounded-xl py-3 px-4 text-sm font-bold text-slate-500 outline-none cursor-not-allowed" 
                               />
-                              {/* --- Catalog Select Logic Removed --- */}
                               {item.item_id && (
                                 <div className="absolute right-2 top-1/2 -translate-y-1/2">
                                     <Box size={16} className="text-slate-300" />
@@ -314,7 +366,7 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
                               />
                           </div>
 
-                          {/* Delete Button Removed (Immutable) */}
+                          {/* Lock Icon */}
                           <div className="md:col-span-1 flex justify-center pt-3">
                               <Lock size={16} className="text-slate-200" />
                           </div>

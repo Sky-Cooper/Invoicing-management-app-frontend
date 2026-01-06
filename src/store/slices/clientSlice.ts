@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { safeApi } from '../../api/client';
 
 export interface Client {
+  logo: string | undefined;
   contact_person: string;
   name: string;
   id?: number;

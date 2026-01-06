@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; 
 import { 
   X, Plus, Trash2, Save, 
-  User, Building2, Calendar, FileText, 
-  Briefcase, Truck, Loader2
+  User, Calendar, FileText, 
+  Briefcase, Truck, Loader2, Box,
+  AlertCircle, 
+  AlertTriangle 
 } from 'lucide-react';
 
-// Adjust paths to your store
 import type { AppDispatch, RootState } from '../store/store';
 import { createPurchaseOrder, type CreatePOPayload, type PurchaseOrderItem } from '../store/slices/purchaseOrderSlice';
 import { fetchClients } from '../store/slices/clientSlice';
-import { fetchChantiers } from '../store/slices/chantierSlice';
 
 interface Props {
   isOpen: boolean;
@@ -20,41 +20,45 @@ interface Props {
 
 const UNIT_TYPES = ["u", "m", "m2", "m3", "kg", "t", "h", "j", "ens", "bag"] as const;
 
+const DEFAULT_FORM_STATE: CreatePOPayload = {
+  po_number: '',
+  client: 0,
+  // chantier: 0, // REMOVED
+  issued_date: new Date().toISOString().split('T')[0],
+  expected_delivery_date: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString().split('T')[0],
+  project_description: '',
+  items: [],
+  chantier: 0
+};
+
 export const CreatePOModal = ({ isOpen, onClose }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   
   const { items: clients } = useSelector((state: RootState) => state.clients);
-  const { items: chantiers } = useSelector((state: RootState) => state.chantiers);
-  const { isLoading, error: reduxError } = useSelector((state: RootState) => state.purchaseOrders);
+  // Chantier selector removed
+  const { isLoading } = useSelector((state: RootState) => state.purchaseOrders);
 
-  // Force fetch data on open
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
   useEffect(() => {
     if (isOpen) {
         if (!clients || clients.length === 0) dispatch(fetchClients());
-        if (!chantiers || chantiers.length === 0) dispatch(fetchChantiers());
+        // fetchChantiers dispatch removed
     }
   }, [isOpen, dispatch]);
 
-  // Form State
-  const [formData, setFormData] = useState<CreatePOPayload>({
-    po_number: '',
-    client: 0,
-    chantier: 0,
-    issued_date: new Date().toISOString().split('T')[0],
-    expected_delivery_date: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString().split('T')[0],
-    project_description: '',
-    items: []
-  });
+  const [formData, setFormData] = useState<CreatePOPayload>(DEFAULT_FORM_STATE);
 
-  // Generate PO Number on open
   useEffect(() => {
     if (isOpen) {
       const randomNum = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-      setFormData(prev => ({
-        ...prev,
-        po_number: `PO-${new Date().getFullYear()}-${randomNum}`,
-        items: [] 
-      }));
+      setAttemptedSubmit(false);
+      setFormError(null); 
+      setFormData({
+        ...DEFAULT_FORM_STATE,
+        po_number: `PO-${new Date().getFullYear()}-${randomNum}`
+      });
     }
   }, [isOpen]);
 
@@ -64,7 +68,6 @@ export const CreatePOModal = ({ isOpen, onClose }: Props) => {
       items: [
         ...prev.items,
         {
-          // FIX: Set to undefined so we don't send a fake ID (like 1) that might not exist
           item_id: undefined, 
           item_name: '',
           item_description: '',
@@ -75,6 +78,13 @@ export const CreatePOModal = ({ isOpen, onClose }: Props) => {
           tax_rate: 20
         }
       ]
+    }));
+  };
+
+  const removeItem = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
     }));
   };
 
@@ -90,27 +100,38 @@ export const CreatePOModal = ({ isOpen, onClose }: Props) => {
 
     newItems[index] = currentItem;
     setFormData({ ...formData, items: newItems });
+    
+    if (formError) setFormError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.client || !formData.chantier) {
-        alert("Veuillez sélectionner un fournisseur/client et un chantier.");
+    setAttemptedSubmit(true);
+    setFormError(null); 
+
+    if (!formData.client) {
+        setFormError("Attention : Veuillez sélectionner un fournisseur.");
         return;
     }
+
     if (formData.items.length === 0) {
-        alert("Veuillez ajouter au moins un article.");
+        setFormError("Attention : Veuillez ajouter au moins un article à la commande.");
+        return;
+    }
+
+    const hasInvalidItems = formData.items.some(item => !item.item_name || item.item_name.trim() === '');
+    
+    if (hasInvalidItems) {
+        setFormError("Action Requise : Veuillez renseigner le nom (désignation) pour tous les articles marqués en rouge.");
         return;
     }
 
     try {
-      // We unwrap the result to catch errors directly here
       await dispatch(createPurchaseOrder(formData)).unwrap();
       onClose();
     } catch (err: any) {
-      console.error("SERVER ERROR:", err);
-      // This will print the specific field causing the 400 error
-      alert(`Erreur: ${JSON.stringify(err)}`); 
+      const msg = typeof err === 'string' ? err : (err.message || "Une erreur serveur est survenue.");
+      setFormError(`Erreur Système : ${msg}`);
     }
   };
 
@@ -145,8 +166,34 @@ export const CreatePOModal = ({ isOpen, onClose }: Props) => {
 
         {/* BODY */}
         <div className="p-8 overflow-y-auto flex-1 space-y-8 bg-[#FAFAFA]">
+          
+          {/* REMINDER CARD (ERROR BANNER) */}
+          <AnimatePresence>
+            {formError && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -20, height: 0 }}
+                className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-4 shadow-sm"
+              >
+                <div className="p-2 bg-white rounded-full text-red-500 shadow-sm shrink-0">
+                  <AlertTriangle size={20} strokeWidth={2.5} />
+                </div>
+                <div className="flex-1 pt-1">
+                  <h4 className="text-red-900 font-bold text-sm">Impossible d'enregistrer</h4>
+                  <p className="text-red-700 text-sm mt-0.5 font-medium">{formError}</p>
+                </div>
+                <button 
+                  onClick={() => setFormError(null)}
+                  className="p-2 text-red-400 hover:text-red-700 hover:bg-red-100 rounded-lg transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5">
@@ -154,36 +201,23 @@ export const CreatePOModal = ({ isOpen, onClose }: Props) => {
                   <User size={14} /> Informations
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative group">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Fournisseur / Client</label>
-                    <select 
-                      className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:border-slate-900 cursor-pointer"
-                      value={formData.client}
-                      onChange={(e) => setFormData({...formData, client: Number(e.target.value)})}
-                    >
-                      <option value={0}>Sélectionner...</option>
-                      {/* FIX: Client Name Display */}
-                      {clients?.map(c => (
-                        <option key={c.id} value={c.id}>
-                            {c.company_name || c.name || c.contact_person || `Client #${c.id}`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="relative group">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Chantier</label>
-                    <select 
-                      className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:border-slate-900 cursor-pointer"
-                      value={formData.chantier}
-                      onChange={(e) => setFormData({...formData, chantier: Number(e.target.value)})}
-                    >
-                      <option value={0}>Sélectionner...</option>
-                      {chantiers?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </div>
+                {/* --- CHANGED: Removed Grid, now just Client Select --- */}
+                <div className="relative group">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Fournisseur / Client</label>
+                  <select 
+                    className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:border-slate-900 cursor-pointer"
+                    value={formData.client}
+                    onChange={(e) => setFormData({...formData, client: Number(e.target.value)})}
+                  >
+                    <option value={0}>Sélectionner...</option>
+                    {clients?.map(c => (
+                      <option key={c.id} value={c.id}>
+                          {c.company_name || c.name || c.contact_person || `Client #${c.id}`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+                {/* --------------------------------------------------- */}
 
                 <div>
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Description</label>
@@ -243,100 +277,124 @@ export const CreatePOModal = ({ isOpen, onClose }: Props) => {
 
           <div className="h-px bg-slate-200 w-full"></div>
 
-          {/* ITEMS SECTION */}
+          {/* --- ARTICLES & SERVICES --- */}
           <div>
             <div className="flex justify-between items-end mb-4">
-               <h3 className="text-lg font-black text-slate-900">Articles</h3>
+               <h3 className="text-lg font-black text-slate-900 flex items-center gap-2"><Briefcase size={20} className="text-slate-400"/> Articles</h3>
                <button 
                   type="button" 
                   onClick={addItem}
                   className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
-                >
+               >
                   <Plus size={16} /> Ajouter Ligne
                </button>
             </div>
 
-            <div className="space-y-3">
-                  {formData.items.length === 0 && (
-                    <div className="py-12 bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
-                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                            <Plus size={24} className="text-slate-300" />
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                {/* Table Header */}
+                <div className="grid grid-cols-12 gap-4 p-4 bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <div className="col-span-1 text-center">#</div>
+                    <div className="col-span-5">Désignation <span className="text-red-500">*</span></div>
+                    <div className="col-span-1 text-center">Qté</div>
+                    <div className="col-span-1 text-center">Unité</div>
+                    <div className="col-span-2 text-right">Prix U. (DH)</div>
+                    <div className="col-span-2 text-right pr-4">Total HT</div>
+                </div>
+
+                {/* Table Body */}
+                <div className="divide-y divide-slate-100">
+                    {formData.items.length === 0 && (
+                        <div className="py-12 flex flex-col items-center justify-center text-center">
+                            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                <Box size={24} className="text-slate-300" />
+                            </div>
+                            <p className="text-slate-400 font-medium text-sm">Aucun article ajouté.</p>
                         </div>
-                        <p className="text-slate-400 font-medium text-sm">Votre commande est vide.</p>
-                    </div>
-                  )}
+                    )}
 
-                  {formData.items.map((item, index) => (
-                    <div key={index} className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                       <div className="hidden md:flex w-8 h-8 rounded-lg bg-slate-50 text-slate-400 font-bold text-xs items-center justify-center border border-slate-100">
-                          {index + 1}
-                       </div>
+                    {formData.items.map((item, index) => {
+                        const isNameMissing = attemptedSubmit && (!item.item_name || item.item_name.trim() === '');
+                        
+                        return (
+                            <div key={index} className={`grid grid-cols-12 gap-4 p-4 items-center group transition-colors ${isNameMissing ? 'bg-red-50/50' : 'hover:bg-slate-50/50'}`}>
+                                <div className="col-span-1 flex justify-center">
+                                    <span className={`w-6 h-6 rounded font-bold text-[10px] flex items-center justify-center ${isNameMissing ? 'bg-red-100 text-red-500' : 'bg-slate-100 text-slate-500'}`}>
+                                        {index + 1}
+                                    </span>
+                                </div>
 
-                       <div className="flex-1 w-full space-y-2">
-                          <input 
-                            placeholder="Nom de l'article"
-                            className="w-full bg-transparent font-bold text-slate-900 outline-none placeholder:text-slate-300"
-                            value={item.item_name}
-                            onChange={(e) => handleItemChange(index, 'item_name', e.target.value)}
-                          />
-                          <input 
-                            placeholder="Description..."
-                            className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none placeholder:text-slate-300"
-                            value={item.item_description}
-                            onChange={(e) => handleItemChange(index, 'item_description', e.target.value)}
-                          />
-                       </div>
+                                {/* Description Inputs */}
+                                <div className="col-span-5 space-y-1">
+                                    <div className="relative">
+                                        <input 
+                                            placeholder="Nom de l'article"
+                                            className={`w-full bg-transparent font-bold text-sm outline-none placeholder:text-slate-300 rounded px-1 transition-all
+                                                ${isNameMissing 
+                                                    ? 'border border-red-300 text-red-900 placeholder:text-red-300 bg-white focus:border-red-500' 
+                                                    : 'text-slate-800 border border-transparent focus:border-slate-200'
+                                                }`}
+                                            value={item.item_name}
+                                            onChange={(e) => handleItemChange(index, 'item_name', e.target.value)}
+                                        />
+                                        {isNameMissing && <AlertCircle size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500" />}
+                                    </div>
+                                    <input 
+                                        placeholder="Description détaillée (optionnel)"
+                                        className="w-full bg-transparent text-xs font-medium text-slate-500 outline-none placeholder:text-slate-300 px-1"
+                                        value={item.item_description}
+                                        onChange={(e) => handleItemChange(index, 'item_description', e.target.value)}
+                                    />
+                                </div>
 
-                       <div className="grid grid-cols-3 gap-2 w-full md:w-auto min-w-[300px]">
-                           <div>
-                              <label className="text-[9px] font-bold text-slate-300 uppercase block mb-1">Qté</label>
-                              <input 
-                                type="number" 
-                                className="w-full p-2 bg-slate-50 rounded-lg border border-slate-100 text-center font-bold text-slate-700 text-sm outline-none focus:bg-white focus:border-slate-300"
-                                value={item.quantity}
-                                onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                              />
-                           </div>
-                           <div>
-                              <label className="text-[9px] font-bold text-slate-300 uppercase block mb-1">Unité</label>
-                              <select 
-                                className="w-full p-2 bg-slate-50 rounded-lg border border-slate-100 text-center font-bold text-slate-500 text-sm outline-none focus:bg-white focus:border-slate-300 uppercase"
-                                value={item.unit}
-                                onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                              >
-                                {UNIT_TYPES.map(u => <option key={u} value={u}>{u}</option>)}
-                              </select>
-                           </div>
-                           <div>
-                              <label className="text-[9px] font-bold text-slate-300 uppercase block mb-1">Prix U.</label>
-                              <input 
-                                type="number" 
-                                className="w-full p-2 bg-slate-50 rounded-lg border border-slate-100 text-right font-bold text-slate-700 text-sm outline-none focus:bg-white focus:border-slate-300"
-                                value={item.unit_price}
-                                onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)}
-                              />
-                           </div>
-                       </div>
+                                {/* Quantity */}
+                                <div className="col-span-1">
+                                    <input 
+                                        type="number" 
+                                        className="w-full p-2 bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 text-center font-bold text-slate-700 text-sm outline-none focus:bg-white focus:border-slate-300 transition-all"
+                                        value={item.quantity}
+                                        onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                                    />
+                                </div>
 
-                       <div className="flex items-center justify-between w-full md:w-auto gap-6 pl-4 border-l border-slate-100">
-                          <div className="text-right min-w-[80px]">
-                            <span className="text-[9px] font-bold text-slate-300 uppercase block">Total HT</span>
-                            <span className="font-black text-slate-900 text-sm">{item.subtotal}</span>
-                          </div>
-                          <button 
-                            type="button"
-                            onClick={() => setFormData({...formData, items: formData.items.filter((_, i) => i !== index)})}
-                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                             <Trash2 size={18} />
-                          </button>
-                       </div>
-                    </div>
-                  ))}
+                                {/* Unit */}
+                                <div className="col-span-1">
+                                    <select 
+                                        className="w-full p-2 bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 text-center font-bold text-slate-500 text-xs uppercase outline-none focus:bg-white focus:border-slate-300 transition-all cursor-pointer"
+                                        value={item.unit}
+                                        onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
+                                    >
+                                        {UNIT_TYPES.map(u => <option key={u} value={u}>{u}</option>)}
+                                    </select>
+                                </div>
+
+                                {/* Unit Price */}
+                                <div className="col-span-2">
+                                    <input 
+                                        type="number" 
+                                        className="w-full p-2 bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 text-right font-bold text-slate-700 text-sm outline-none focus:bg-white focus:border-slate-300 transition-all"
+                                        value={item.unit_price}
+                                        onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)}
+                                    />
+                                </div>
+
+                                {/* Total & Delete */}
+                                <div className="col-span-2 flex items-center justify-end gap-3">
+                                    <span className="font-black text-slate-900 text-sm">{item.subtotal}</span>
+                                    <button 
+                                        onClick={() => removeItem(index)}
+                                        className="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
           </div>
           
-          {/* Summary */}
+          {/* Summary / Totals */}
           {formData.items.length > 0 && (
             <div className="flex justify-end mt-6">
                 <div className="w-full md:w-1/3 bg-white rounded-2xl border border-slate-100 p-5 space-y-3 shadow-sm">
@@ -356,6 +414,7 @@ export const CreatePOModal = ({ isOpen, onClose }: Props) => {
                 </div>
             </div>
           )}
+
         </div>
 
         {/* FOOTER */}

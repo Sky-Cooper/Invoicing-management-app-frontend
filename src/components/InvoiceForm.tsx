@@ -5,7 +5,6 @@ import {
   Briefcase, AlertCircle, Box, FileText 
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
-// Import the types we created in the slice
 import { createInvoice, clearInvoiceError, type InvoicePayload, type InvoiceItem } from '../store/slices/invoiceSlice';
 import { fetchClients } from '../store/slices/clientSlice';
 import { fetchChantiers } from '../store/slices/chantierSlice';
@@ -44,10 +43,9 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
     Subject: '',
   });
 
-  // ✅ FIX: Use strict typing for items state
   const [items, setItems] = useState<InvoiceItem[]>([
     { 
-        item_id: null, // Start with null (Custom Item)
+        item_id: null, 
         item_name: '', 
         item_description: '', 
         unit: 'unité', 
@@ -55,9 +53,24 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
         unit_price: '0.00', 
         tax_rate: '20.00', 
         subtotal: '0.00',
-        item_code: null // Added to match interface
+        item_code: null 
     }
   ]);
+
+  // --- NEW HANDLER: Select Chantier & Auto-fill Contract ---
+  const handleChantierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+    
+    // Find the full chantier object to get its contract number
+    const selectedChantier = chantiers.find(c => c.id === Number(selectedId));
+
+    setFormData(prev => ({
+        ...prev,
+        chantier: selectedId,
+        // Auto-fill contract number if found, otherwise reset or keep empty
+        contract_number: selectedChantier ? selectedChantier.contract_number : ''
+    }));
+  };
 
   const handleLoadFromCatalog = (index: number, catalogId: string) => {
     if (!catalogId) return;
@@ -67,13 +80,12 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
       const newItems = [...items];
       newItems[index] = {
         ...newItems[index],
-        item_id: product.id, // ✅ Sets the Catalog ID (3, 4, etc.)
+        item_id: product.id,
         item_name: product.name,
         item_description: product.description || '',
         unit: product.unit,
         unit_price: product.unit_price,
         tax_rate: product.tax_rate,
-        // Calculate subtotal for UI display
         subtotal: (parseFloat(String(product.unit_price)) * parseFloat(String(newItems[index].quantity || '1'))).toFixed(2)
       };
       setItems(newItems);
@@ -84,7 +96,6 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
     const newItems = [...items];
     (newItems[index] as any)[field] = value;
     
-    // ✅ If name changes manually, reset item_id to null (It becomes a Custom Item)
     if (field === 'item_name') {
         newItems[index].item_id = null; 
     }
@@ -119,17 +130,12 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // ✅ PREPARE PAYLOAD
-    // We construct the object using the Slice Interface
     const payload: InvoicePayload = {
       ...formData,
       client: parseInt(formData.client),
       chantier: parseInt(formData.chantier),
-      
-      // ✅ We map local 'items' to 'invoice_items'
-      // The Slice sanitizer will see this, rename it to 'items', and handle the IDs
       invoice_items: items.map(item => ({
-        item_id: item.item_id || null, // null for custom, number for catalog
+        item_id: item.item_id || null, 
         item_name: item.item_name,
         item_description: item.item_description || null,
         unit: item.unit,
@@ -193,12 +199,13 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                     </div>
                 </div>
+                
                 <div>
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                         <HardHat size={12} /> Projet Lié
                     </label>
                     <div className="relative">
-                        <select required value={formData.chantier} onChange={(e) => setFormData({...formData, chantier: e.target.value})}
+                        <select required value={formData.chantier} onChange={handleChantierChange}
                             className="w-full bg-slate-50 border border-slate-100 rounded-xl py-4 pl-4 pr-10 font-bold text-sm text-slate-800 outline-none focus:border-red-500 appearance-none cursor-pointer">
                             <option value="">Sélectionner...</option>
                             {chantiers.map(ch => <option key={ch.id} value={ch.id}>{ch.name}</option>)}
@@ -206,6 +213,7 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                     </div>
                 </div>
+
                 <div>
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                         <FileText size={12} /> Objet / Titre
@@ -218,7 +226,9 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                       className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-red-500" 
                     />
                 </div>
+                
                 <div className="h-px bg-slate-100 w-full my-2" />
+                
                 <div className="flex-1">
                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                       <Briefcase size={12}/> Objet de la mission
@@ -226,13 +236,18 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                    <textarea required placeholder="Description détaillée..." value={formData.project_description} onChange={(e) => setFormData({...formData, project_description: e.target.value})}
                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-medium text-slate-600 h-32 outline-none focus:bg-white focus:border-red-500 transition-all resize-none" />
                 </div>
-                <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                        <FileText size={12} /> N° Contrat
-                    </label>
-                    <input required placeholder="ex: 0113Y/24" value={formData.contract_number} onChange={(e) => setFormData({...formData, contract_number: e.target.value})}
-                        className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-red-500" />
-                </div>
+
+                {/* --- CONDITIONAL CONTRACT NUMBER --- */}
+                {formData.chantier && (
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            <FileText size={12} /> N° Contrat
+                        </label>
+                        <input required placeholder="ex: 0113Y/24" value={formData.contract_number} onChange={(e) => setFormData({...formData, contract_number: e.target.value})}
+                            className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-red-500" />
+                    </div>
+                )}
+
              </div>
           </div>
 

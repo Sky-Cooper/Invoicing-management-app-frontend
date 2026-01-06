@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // 1. Import useEffect
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom'; // 2. Import useNavigate
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../store/hooks/useAuth';
+import { useAppSelector } from '../store/hooks/hooks'; // 3. Import selector to check token
 
 // --- Schéma de validation ---
 const loginSchema = z.object({
@@ -13,14 +15,26 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export const Login = () => {
+  const navigate = useNavigate(); // 4. Initialize navigation
   const { loginUser, isLoading, error } = useAuth();
   
+  // 5. Watch the accessToken from your Redux store
+  const { accessToken } = useAppSelector((state) => state.auth);
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
+  // 6. Effect: Redirect immediately when accessToken exists
+  useEffect(() => {
+    if (accessToken) {
+      navigate('/profile');
+    }
+  }, [accessToken, navigate]);
+
   const onSubmit = (data: LoginFormData) => {
     loginUser(data);
+    // The useEffect above will handle the redirection once the state updates
   };
 
   return (
@@ -36,7 +50,7 @@ export const Login = () => {
           backgroundPosition: 'center',
         }}
       >
-        {/* Overlay dégradé pour un look plus moderne et une meilleure lisibilité du texte du bas */}
+        {/* Overlay dégradé */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
         {/* Contenu Texte sur l'image */}
@@ -84,7 +98,6 @@ export const Login = () => {
                 {...register('email')}
                 type="email"
                 placeholder="vous@exemple.com"
-                // Design input plus moderne : fond blanc, bordure subtile, ombre portée légère
                 className={`block w-full rounded-xl border-gray-300 bg-white px-5 py-4 text-slate-900 placeholder-gray-400 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all ${errors.email ? 'border-red-300 ring-red-200' : ''}`}
               />
               {errors.email && <p className="mt-2 text-sm font-medium text-red-600">{errors.email.message}</p>}
@@ -106,14 +119,12 @@ export const Login = () => {
               {errors.password && <p className="mt-2 text-sm font-medium text-red-600">{errors.password.message}</p>}
             </div>
 
-            {/* Bouton de soumission Premium */}
+            {/* Bouton de soumission */}
             <button
               type="submit"
               disabled={isLoading}
-              // Dégradé de rouge et ombre portée colorée
               className="group relative mt-8 w-full overflow-hidden rounded-xl bg-gradient-to-br from-red-600 to-red-800 py-4 text-base font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-red-500/50 hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {/* Petit effet de brillance au survol */}
               <div className="absolute inset-0 h-full w-full bg-white/0 transition-all group-hover:bg-white/10"></div>
               <span className="relative">
                 {isLoading ? 'Connexion en cours...' : 'Se connecter'}
