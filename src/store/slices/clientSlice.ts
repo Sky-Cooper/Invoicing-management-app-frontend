@@ -60,6 +60,7 @@ export const createClient = createAsyncThunk(
       return response.data;
     } catch (err) {
       const error = err as AxiosError<any>;
+      // Returns backend validation object (e.g. { ice: ["Already exists"] })
       return rejectWithValue(error.response?.data || 'Erreur création');
     }
   }
@@ -119,24 +120,59 @@ const clientSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchClients.pending, (state) => { state.isLoading = true; })
+      // --- Fetch ---
+      .addCase(fetchClients.pending, (state) => { 
+        state.isLoading = true; 
+        state.error = null;
+      })
       .addCase(fetchClients.fulfilled, (state, action) => {
         state.isLoading = false;
         state.items = action.payload;
       })
+      .addCase(fetchClients.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload; // ✅ Capture Fetch Errors
+      })
+
+      // --- Create ---
+      .addCase(createClient.pending, (state) => {
+        state.isCreating = true;
+        state.error = null; // Clear previous errors
+        state.success = false;
+      })
       .addCase(createClient.fulfilled, (state, action) => {
+        state.isCreating = false;
         state.items.unshift(action.payload);
         state.success = true;
       })
-      .addCase(updateClient.pending, (state) => { state.isUpdating = true; })
+      .addCase(createClient.rejected, (state, action) => {
+        state.isCreating = false;
+        state.error = action.payload; // ✅ Capture Validation Errors
+      })
+
+      // --- Update ---
+      .addCase(updateClient.pending, (state) => { 
+        state.isUpdating = true; 
+        state.error = null;
+        state.success = false;
+      })
       .addCase(updateClient.fulfilled, (state, action) => {
         state.isUpdating = false;
         const index = state.items.findIndex(c => c.id === action.payload.id);
         if (index !== -1) state.items[index] = action.payload;
         state.success = true;
       })
+      .addCase(updateClient.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.payload; // ✅ Capture Validation Errors
+      })
+
+      // --- Delete ---
       .addCase(deleteClient.fulfilled, (state, action) => {
         state.items = state.items.filter(c => c.id !== action.payload);
+      })
+      .addCase(deleteClient.rejected, (state, action) => {
+        state.error = action.payload; // ✅ Capture Delete Errors
       });
   },
 });

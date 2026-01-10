@@ -202,7 +202,7 @@ export const Register = () => {
           <h1 className="max-w-xl text-5xl font-extrabold leading-tight drop-shadow-lg">Construisez votre empire avec nous.</h1>
           <p className="mt-6 max-w-lg text-lg text-gray-200">Rejoignez la plateforme conçue pour les entreprises modernes.</p>
         </div>
-        <p className="relative z-10 text-sm text-gray-400">© 2024 TOURTRA Inc.</p>
+        <p className="relative z-10 text-sm text-gray-400">© 2026 TOURTRA Inc.</p>
       </div>
 
       {/* --- COLONNE DROITE (Formulaire) --- */}

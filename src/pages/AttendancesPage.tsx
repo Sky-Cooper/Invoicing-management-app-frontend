@@ -8,7 +8,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 import type { AppDispatch, RootState } from '../store/store';
-// Added fetchAttendanceReports here
 import { fetchAttendances, markAttendance, deleteAttendance, fetchAttendanceReports } from '../store/slices/attendanceSlice';
 import { fetchEmployees } from '../store/slices/employeeSlice';
 import { fetchChantiers } from '../store/slices/chantierSlice';
@@ -349,18 +348,7 @@ export const AttendancesPage = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
               
-              {/* BUTTON: RAPPORTS (NEW) */}
-              <button 
-                onClick={() => setIsReportsModalOpen(true)}
-                className="group bg-slate-900 rounded-2xl border border-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-all duration-300 p-1 flex items-stretch"
-              >
-                 <div className="flex items-center gap-3 px-4 py-2">
-                    <FileText size={18} className="text-slate-400 group-hover:text-white transition-colors" />
-                    <span className="block text-[10px] font-bold uppercase tracking-wider text-left">
-                       Rapports <br/> <span className="text-xs text-slate-400">PDF</span>
-                    </span>
-                 </div>
-              </button>
+              {/* --- REPORT BUTTON REMOVED FROM HERE --- */}
 
               {/* CHANTIER SELECTOR */}
               <div className="group bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 p-1">

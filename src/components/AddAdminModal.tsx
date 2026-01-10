@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { X, ShieldCheck, Receipt, User, Mail, Phone, Key, Building2, Loader2 } from 'lucide-react';
+import { X, ShieldCheck, Receipt, User, Mail, Phone, Key, Building2, Loader2, AlertCircle } from 'lucide-react';
 import { createDeptAdmin, updateDeptAdmin, resetStatus } from '../store/slices/deptAdminSlice';
 import { fetchDepartments } from '../store/slices/departmentSlice';
 import type { AppDispatch, RootState } from '../store/store';
@@ -14,7 +14,9 @@ interface ModalProps {
 export const AddAdminModal = ({ isOpen, onClose, initialData }: ModalProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { items: departments } = useSelector((state: RootState) => state.departments);
-  const { isCreating, isUpdating, isLoading } = useSelector((state: RootState) => state.deptAdmins);
+  
+  // ✅ 1. Get ERROR from Redux
+  const { isCreating, isUpdating, isLoading, error } = useSelector((state: RootState) => state.deptAdmins);
 
   const [formData, setFormData] = useState({
     first_name: '', 
@@ -76,6 +78,31 @@ export const AddAdminModal = ({ isOpen, onClose, initialData }: ModalProps) => {
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors"><X size={24} className="text-slate-400" /></button>
         </div>
+
+        {/* ✅ 2. ERROR DISPLAY SECTION */}
+        {error && (
+          <div className="mb-6 rounded-2xl bg-red-50 p-4 border border-red-100 flex items-start gap-3 animate-pulse">
+            <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={18} />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-black text-red-800 uppercase tracking-wider">
+                Erreur
+              </span>
+              <div className="text-sm font-medium text-red-600 space-y-1">
+                {/* Logic to handle string errors vs object errors (Django style) */}
+                {typeof error === 'string' ? (
+                  <p>{error}</p>
+                ) : (
+                  Object.entries(error).map(([key, messages]: [string, any]) => (
+                    <div key={key} className="flex flex-col">
+                      <span className="font-bold text-red-800 capitalize text-xs">{key.replace('_', ' ')}:</span>
+                      <span className="text-xs">{Array.isArray(messages) ? messages[0] : messages}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           

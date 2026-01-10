@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
 import { 
   X, Loader2, Building2, User, Hash, Mail, 
-  Phone, MapPin, ShieldCheck, Fingerprint, Globe, CheckCircle2, BadgeCheck
+  Phone, MapPin, ShieldCheck, Fingerprint, Globe, CheckCircle2, BadgeCheck, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,6 +20,7 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
   const dispatch = useAppDispatch();
   
   const { data: userProfile } = useAppSelector((state: RootState) => state.profile);
+  // ✅ 1. Get error from Redux
   const { isCreating, isUpdating, success, error } = useAppSelector((state: RootState) => state.clients);
 
   const [formData, setFormData] = useState<Partial<Client>>({
@@ -60,13 +61,10 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
 
   // --- Logique Téléphone (+212 + 9 chiffres) ---
   const handlePhoneChange = (value: string) => {
-    // On garde le +212 comme base immuable
     if (!value.startsWith('+212')) {
       value = '+212';
     }
-    // On extrait uniquement les chiffres après le préfixe
     const digitsOnly = value.slice(4).replace(/\D/g, '');
-    // On limite à 9 chiffres maximum
     const limitedDigits = digitsOnly.slice(0, 9);
     
     setFormData({ ...formData, phone: '+212' + limitedDigits });
@@ -75,7 +73,6 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation finale avant envoi
     if (formData.phone && formData.phone.length !== 13) {
         alert("Le numéro de téléphone doit contenir exactement 9 chiffres après +212");
         return;
@@ -101,9 +98,10 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
 
   if (!isOpen) return null;
 
+  // Helper to extract specific field errors
   const getFieldError = (fieldName: string) => {
     if (error && typeof error === 'object' && error[fieldName]) {
-      return error[fieldName][0];
+      return Array.isArray(error[fieldName]) ? error[fieldName][0] : error[fieldName];
     }
     return null;
   };
@@ -141,6 +139,39 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
           </div>
 
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto no-scrollbar p-8 lg:p-14 bg-slate-50/30">
+            
+            {/* ✅ 2. ERROR ALERT BOX (Added Here) */}
+            {error && (
+              <div className="mb-10 rounded-3xl bg-red-50 p-6 border border-red-100 flex items-start gap-4 animate-in slide-in-from-top-4 fade-in">
+                <div className="p-3 bg-red-100 rounded-2xl shrink-0">
+                   <AlertCircle className="text-red-600" size={24} />
+                </div>
+                <div className="flex flex-col gap-1 pt-1">
+                  <span className="text-xs font-black text-red-800 uppercase tracking-widest">
+                    Échec de la validation
+                  </span>
+                  <div className="text-sm font-medium text-red-600 space-y-1">
+                    {typeof error === 'string' ? (
+                      <p>{error}</p>
+                    ) : (
+                      Object.entries(error).map(([key, messages]: [string, any]) => (
+                        <div key={key} className="flex flex-col">
+                           {/* Only show here if it's NOT a specific field (optional preference), 
+                               or show all for clarity. Here we show all. */}
+                           <span className="font-bold text-red-800 capitalize text-xs opacity-80">
+                             {key.replace('_', ' ')}:
+                           </span>
+                           <span className="text-xs">
+                             {Array.isArray(messages) ? messages[0] : messages}
+                           </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
               
               {/* VISUEL GAUCHE (Logo & Branding) */}
@@ -186,10 +217,11 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
                           required
                           placeholder="+212 6XXXXXXXX"
                           className={`w-full pl-16 pr-6 py-5 rounded-[2rem] bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm
-                            ${formData.phone?.length === 13 ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`}
+                            ${getFieldError('phone') ? 'border-red-400 bg-red-50' : formData.phone?.length === 13 ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`}
                           value={formData.phone} 
                           onChange={(e) => handlePhoneChange(e.target.value)}
                         />
+                        
                         {/* Indicateur visuel de validité */}
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-1">
                             {[...Array(9)].map((_, i) => (
@@ -197,6 +229,12 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
                             ))}
                         </div>
                       </div>
+                      {/* Show Phone Error if exists */}
+                      {getFieldError('phone') && (
+                          <p className="mt-2 text-[9px] font-black text-red-500 uppercase italic ml-6 leading-none">
+                              {getFieldError('phone')}
+                          </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -235,11 +273,17 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
                     </label>
                     <textarea 
                       rows={3} 
-                      className="w-full px-8 py-6 rounded-[2.5rem] bg-white border-2 border-slate-100 focus:border-red-500/30 focus:ring-4 focus:ring-red-500/5 outline-none font-bold text-sm transition-all resize-none shadow-sm"
+                      className={`w-full px-8 py-6 rounded-[2.5rem] bg-white border-2 outline-none font-bold text-sm transition-all resize-none shadow-sm
+                        ${getFieldError('address') ? 'border-red-400 bg-red-50' : 'border-slate-100 focus:border-red-500/30 focus:ring-4 focus:ring-red-500/5'}`}
                       value={formData.address} 
                       onChange={(e) => setFormData({...formData, address: e.target.value})}
                       placeholder="Adresse complète du client..."
                     />
+                    {getFieldError('address') && (
+                        <p className="mt-2 text-[9px] font-black text-red-500 uppercase italic ml-6 leading-none">
+                            {getFieldError('address')}
+                        </p>
+                    )}
                   </div>
                 </div>
               </div>

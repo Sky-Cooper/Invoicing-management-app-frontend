@@ -55,6 +55,7 @@ export const createDeptAdmin = createAsyncThunk(
       return response.data;
     } catch (err) {
       const error = err as AxiosError<any>;
+      // This sends the backend error object (e.g. {phone_number: "Invalid..."}) to Redux
       return rejectWithValue(error.response?.data || 'Erreur lors de la création');
     }
   }
@@ -101,26 +102,57 @@ const deptAdminSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchDeptAdmins.pending, (state) => { state.isLoading = true; })
+      // --- FETCH ---
+      .addCase(fetchDeptAdmins.pending, (state) => { 
+        state.isLoading = true; 
+        state.error = null;
+      })
       .addCase(fetchDeptAdmins.fulfilled, (state, action) => {
         state.isLoading = false;
         state.admins = action.payload;
       })
-      .addCase(createDeptAdmin.pending, (state) => { state.isCreating = true; })
+      .addCase(fetchDeptAdmins.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload; // ✅ Error captured
+      })
+
+      // --- CREATE ---
+      .addCase(createDeptAdmin.pending, (state) => { 
+        state.isCreating = true; 
+        state.error = null;
+      })
       .addCase(createDeptAdmin.fulfilled, (state, action) => {
         state.isCreating = false;
         state.admins.push(action.payload);
         state.success = true;
       })
-      .addCase(updateDeptAdmin.pending, (state) => { state.isUpdating = true; })
+      .addCase(createDeptAdmin.rejected, (state, action) => {
+        state.isCreating = false;
+        state.error = action.payload; // ✅ Error captured (e.g. Phone number invalid)
+      })
+
+      // --- UPDATE ---
+      .addCase(updateDeptAdmin.pending, (state) => { 
+        state.isUpdating = true; 
+        state.error = null;
+      })
       .addCase(updateDeptAdmin.fulfilled, (state, action) => {
         state.isUpdating = false;
         const index = state.admins.findIndex(a => a.id === action.payload.id);
         if (index !== -1) state.admins[index] = action.payload;
         state.success = true;
       })
+      .addCase(updateDeptAdmin.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.payload; // ✅ Error captured
+      })
+
+      // --- DELETE ---
       .addCase(deleteDeptAdmin.fulfilled, (state, action) => {
         state.admins = state.admins.filter(a => a.id !== action.payload);
+      })
+      .addCase(deleteDeptAdmin.rejected, (state, action) => {
+        state.error = action.payload; // ✅ Error captured
       });
   },
 });

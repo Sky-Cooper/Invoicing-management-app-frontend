@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 import { safeApi } from '../../api/client';
 
-// --- INTERFACES (Corrected to match API JSON) ---
+// --- INTERFACES ---
 
 export interface NestedUser {
   id: number;
@@ -10,14 +10,10 @@ export interface NestedUser {
   last_name: string;
   email: string;
   phone_number: string;
-  // ✅ FIX: Allow null because JSON shows "department": null
   department: number | null; 
   company: number;
   preferred_language: string;
   is_active: boolean;
-  
-  // Optional: Keep 'password' if you use this interface for creation forms, 
-  // but it will never be returned by the API for security reasons.
   password?: string; 
 }
 
@@ -28,9 +24,6 @@ export interface Employee {
   job_title: string;
   hire_date: string;
   created_at: string;
-  
-  // ❌ REMOVED: 'role' and 'chantier' are not in your JSON response.
-  // If you need them, they must be added to the backend serializer first.
 }
 
 interface EmployeeState {
@@ -38,7 +31,7 @@ interface EmployeeState {
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
-  error: string | Record<string, any> | null;
+  error: string | Record<string, any> | null; // Flexible type for Django errors
   success: boolean;
 }
 
@@ -51,7 +44,7 @@ const initialState: EmployeeState = {
   success: false,
 };
 
-// --- THUNKS (Appels API) ---
+// --- THUNKS ---
 
 // 1. Fetch All
 export const fetchEmployees = createAsyncThunk(
@@ -76,6 +69,7 @@ export const createEmployee = createAsyncThunk(
       return response.data;
     } catch (err) {
       const error = err as AxiosError<any>;
+      // Returns the field errors (e.g. { cin: ["This field is required"] })
       return rejectWithValue(error.response?.data || 'Erreur lors de la création');
     }
   }
@@ -124,7 +118,7 @@ const employeeSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch
+      // --- Fetch ---
       .addCase(fetchEmployees.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -135,10 +129,10 @@ const employeeSlice = createSlice({
       })
       .addCase(fetchEmployees.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload as any;
       })
 
-      // Create
+      // --- Create ---
       .addCase(createEmployee.pending, (state) => {
         state.isCreating = true;
         state.error = null;
@@ -151,10 +145,10 @@ const employeeSlice = createSlice({
       })
       .addCase(createEmployee.rejected, (state, action) => {
         state.isCreating = false;
-        state.error = action.payload as any;
+        state.error = action.payload as any; // ✅ Captures Validation Errors
       })
 
-      // Update
+      // --- Update ---
       .addCase(updateEmployee.pending, (state) => {
         state.isUpdating = true;
         state.error = null;
@@ -170,12 +164,15 @@ const employeeSlice = createSlice({
       })
       .addCase(updateEmployee.rejected, (state, action) => {
         state.isUpdating = false;
-        state.error = action.payload as any;
+        state.error = action.payload as any; // ✅ Captures Validation Errors
       })
 
-      // Delete
+      // --- Delete ---
       .addCase(deleteEmployee.fulfilled, (state, action) => {
         state.items = state.items.filter(e => e.id !== action.payload);
+      })
+      .addCase(deleteEmployee.rejected, (state, action) => {
+        state.error = action.payload as any; // ✅ Added this (was missing)
       });
   },
 });

@@ -29,23 +29,22 @@ import { PurchaseOrdersPage } from './pages/PurchaseOrdersPage';
 
 // --- RH (RESSOURCES HUMAINES) ---
 import { AttendancesPage } from './pages/AttendancesPage';
+import { ReportsPage } from './pages/ReportsPage'; // ✅ IMPORT ADDED
 import { ContractsPage } from './pages/ContractsPage'; 
 import { EOSBPage } from './pages/EOSBPage'; 
 import { PaymentsPage } from './pages/Paiement';
 
 // --- DÉPENSES & CHARGES ---
 import { ExpensesPage } from './pages/Expence';
-import FixedChargesPage from './pages/FixedChargesPage'; // <--- IMPORT ADDED
+import FixedChargesPage from './pages/FixedChargesPage';
 
 // --- COMPOSANT DE CHARGEMENT AUTOMATIQUE ---
 const ProfileLoader = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useAppDispatch();
   const accessToken = useAppSelector((state) => state.auth.accessToken); 
-  // We read these values to check them, but we do NOT include them in the dependency array
   const { data: userProfile, isLoading } = useAppSelector((state) => state.profile);
 
   useEffect(() => {
-    // Check if we have a token, but no profile data yet, and we aren't currently loading
     if (accessToken && !userProfile && !isLoading) {
       console.log("Extraction des données de l'entreprise depuis le profil...");
       dispatch(fetchProfile());
@@ -74,126 +73,133 @@ function App() {
             {/* --- BLOC 3 : ROUTES PROTÉGÉES --- */}
             <Route element={<RequireAuth />}>
                 
-               <Route path="/" element={<Navigate to="/profile" replace />} />
+                <Route path="/" element={<Navigate to="/profile" replace />} />
 
-               {/* Dashboard Principal */}
-               <Route path="/dashboard" element={
-                 <DashboardLayout>
-                   <DashboardPage />
-                 </DashboardLayout>
-               } />
+                {/* Dashboard Principal */}
+                <Route path="/dashboard" element={
+                  <DashboardLayout>
+                    <DashboardPage />
+                  </DashboardLayout>
+                } />
 
-               {/* Paramètres */}
-               <Route path="/profile" element={
-                 <DashboardLayout>
-                   <Settings />
-                 </DashboardLayout>
-               } />
+                {/* Paramètres */}
+                <Route path="/profile" element={
+                  <DashboardLayout>
+                    <Settings />
+                  </DashboardLayout>
+                } />
 
-               {/* Départements & Admin */}
-               <Route path="/departments" element={
-                 <DashboardLayout>
-                   <Departments />
-                 </DashboardLayout>
-               } />
+                {/* Départements & Admin */}
+                <Route path="/departments" element={
+                  <DashboardLayout>
+                    <Departments />
+                  </DashboardLayout>
+                } />
 
-               <Route path="/department-admins" element={
-                 <DashboardLayout>
-                   <DepartmentAdminsPage />
-                 </DashboardLayout>
-               } />
+                <Route path="/department-admins" element={
+                  <DashboardLayout>
+                    <DepartmentAdminsPage />
+                  </DashboardLayout>
+                } />
 
-               {/* Clients & Employés */}
-               <Route path="/clients" element={
-                 <DashboardLayout>
-                   <ClientsPage />
-                 </DashboardLayout>
-               } />
+                {/* Clients & Employés */}
+                <Route path="/clients" element={
+                  <DashboardLayout>
+                    <ClientsPage />
+                  </DashboardLayout>
+                } />
 
-               <Route path="/employees" element={
-                 <DashboardLayout>
-                   <EmployeesPage />
-                 </DashboardLayout>
-               } />
+                <Route path="/employees" element={
+                  <DashboardLayout>
+                    <EmployeesPage />
+                  </DashboardLayout>
+                } />
 
-               {/* CONTRATS DE TRAVAIL */}
-               <Route path="/contracts" element={
-                 <DashboardLayout>
-                   <ContractsPage />
-                 </DashboardLayout>
-               } />
+                {/* CONTRATS DE TRAVAIL */}
+                <Route path="/contracts" element={
+                  <DashboardLayout>
+                    <ContractsPage />
+                  </DashboardLayout>
+                } />
 
-               {/* SOLDE DE TOUT COMPTE (EOSB) */}
-               <Route path="/eosb" element={
-                 <DashboardLayout>
-                   <EOSBPage />
-                 </DashboardLayout>
-               } />
+                {/* SOLDE DE TOUT COMPTE (EOSB) */}
+                <Route path="/eosb" element={
+                  <DashboardLayout>
+                    <EOSBPage />
+                  </DashboardLayout>
+                } />
 
-               {/* Chantiers & Gestion de terrain */}
-               <Route path="/chantiers" element={
-                 <DashboardLayout>
-                   <ChantiersPage />
-                 </DashboardLayout>
-               } />
+                {/* Chantiers & Gestion de terrain */}
+                <Route path="/chantiers" element={
+                  <DashboardLayout>
+                    <ChantiersPage />
+                  </DashboardLayout>
+                } />
 
-               <Route path="/assignments" element={
-                 <DashboardLayout>
-                   <AssignmentsPage />
-                 </DashboardLayout>
-               } />
+                <Route path="/assignments" element={
+                  <DashboardLayout>
+                    <AssignmentsPage />
+                  </DashboardLayout>
+                } />
 
-               {/* --- SECTION FACTURATION & ACHATS --- */}
-               <Route path="/invoices" element={
-                 <DashboardLayout>
-                   <InvoicesPage />
-                 </DashboardLayout>
-               } />
-               
-               <Route path="/quotes" element={
-                 <DashboardLayout>
-                   <QuotesPage />
-                 </DashboardLayout>
-               } />
+                {/* --- SECTION FACTURATION & ACHATS --- */}
+                <Route path="/invoices" element={
+                  <DashboardLayout>
+                    <InvoicesPage />
+                  </DashboardLayout>
+                } />
+                
+                <Route path="/quotes" element={
+                  <DashboardLayout>
+                    <QuotesPage />
+                  </DashboardLayout>
+                } />
 
-               <Route path="/purchase-orders" element={
-                 <DashboardLayout>
-                   <PurchaseOrdersPage />
-                 </DashboardLayout>
-               } />
+                <Route path="/purchase-orders" element={
+                  <DashboardLayout>
+                    <PurchaseOrdersPage />
+                  </DashboardLayout>
+                } />
 
-               {/* RÈGLEMENTS */}
-               <Route path="/payments" element={
-                 <DashboardLayout>
-                   <PaymentsPage />
-                 </DashboardLayout>
-               } />
+                {/* RÈGLEMENTS */}
+                <Route path="/payments" element={
+                  <DashboardLayout>
+                    <PaymentsPage />
+                  </DashboardLayout>
+                } />
 
-               {/* DÉPENSES & CHARGES FIXES */}
-               <Route path="/expenses" element={
-                 <DashboardLayout>
-                   <ExpensesPage />
-                 </DashboardLayout>
-               } />
+                {/* DÉPENSES & CHARGES FIXES */}
+                <Route path="/expenses" element={
+                  <DashboardLayout>
+                    <ExpensesPage />
+                  </DashboardLayout>
+                } />
 
-               <Route path="/fixed-charges" element={ // <--- ROUTE ADDED
-                 <DashboardLayout>
-                   <FixedChargesPage />
-                 </DashboardLayout>
-               } />
+                <Route path="/fixed-charges" element={
+                  <DashboardLayout>
+                    <FixedChargesPage />
+                  </DashboardLayout>
+                } />
 
-               <Route path="/items" element={
-                 <DashboardLayout>
-                   <ItemsPage />
-                 </DashboardLayout>
-               } />
+                <Route path="/items" element={
+                  <DashboardLayout>
+                    <ItemsPage />
+                  </DashboardLayout>
+                } />
 
-               {/* Pointage RH */}
-               <Route path="/attendance" element={
-                 <DashboardLayout>
-                   <AttendancesPage />
-                 </DashboardLayout>
-               } />
+                {/* Pointage RH */}
+                <Route path="/attendance" element={
+                  <DashboardLayout>
+                    <AttendancesPage />
+                  </DashboardLayout>
+                } />
+
+                {/* ✅ RAPPORTS (New Route) */}
+                <Route path="/reports" element={
+                  <DashboardLayout>
+                    <ReportsPage />
+                  </DashboardLayout>
+                } />
 
             </Route>
           </Route>

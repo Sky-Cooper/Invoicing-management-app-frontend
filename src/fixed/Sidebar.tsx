@@ -135,6 +135,15 @@ export const NAV_ITEMS = [
     roles: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'HR_ADMIN'], 
     category: 'HR' 
   },
+  // ✅ ADDED RAPPORTS HERE
+  { 
+    name: 'Rapports', 
+    icon: FileText, 
+    id: 'reports', 
+    path: '/reports', 
+    roles: ['SUPER_ADMIN', 'COMPANY_ADMIN'], // Restricted Access
+    category: 'HR' 
+  },
   { 
     name: 'Affectations', 
     icon: ClipboardList, 
