@@ -267,7 +267,7 @@ export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
 
         <div className="p-10 border-t border-slate-100 bg-white flex justify-end gap-6 shrink-0">
           <button type="button" onClick={onClose} className="px-10 py-5 text-slate-400 hover:text-slate-900 font-black uppercase text-xs tracking-[0.2em] transition-colors">Fermer</button>
-          <button onClick={handleUpdate} disabled={isLoading} className="bg-gradient-to-r from-slate-900 to-black hover:from-black hover:to-slate-900 text-white px-16 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] flex items-center gap-4 transition-all shadow-2xl active:scale-95 disabled:opacity-50">
+          <button onClick={handleUpdate} disabled={isLoading} className="bg-linear-to-r from-slate-900 to-black hover:from-black hover:to-slate-900 text-white px-16 py-5 rounded-4xl font-black uppercase text-xs tracking-[0.2em] flex items-center gap-4 transition-all shadow-2xl active:scale-95 disabled:opacity-50">
             {isLoading ? <Loader2 className="animate-spin" size={20}/> : <Save size={20} />} Enregistrer
           </button>
         </div>

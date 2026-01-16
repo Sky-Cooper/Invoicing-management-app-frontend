@@ -391,7 +391,7 @@ export const QuotesPage = () => {
                                          <div className="flex items-center justify-end gap-2">
                                              {q.download_url && (
                                                  <a 
-                                                    href={`http://127.0.0.1:8000${q.download_url}`} 
+                                                    href={`https://api.tourtra.ma${q.download_url}`} 
                                                     target="_blank" 
                                                     rel="noreferrer"
                                                     className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"

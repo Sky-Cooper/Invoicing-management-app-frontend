@@ -239,7 +239,7 @@ export const PurchaseOrdersPage = () => {
                                      <td className="px-6 py-5 text-right">
                                          <div className="flex items-center justify-end gap-2">
                                              {p.download_url && (
-                                                 <a href={`http://127.0.0.1:8000${p.download_url}`} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
+                                                 <a href={`https://api.tourtra.ma${p.download_url}`} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors">
                                                      <Download size={16} />
                                                  </a>
                                              )}

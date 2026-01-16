@@ -10,7 +10,7 @@ interface InvoiceTableProps {
 }
 
 export const InvoiceTable = ({ invoices, isLoading, onView, onEdit }: InvoiceTableProps) => {
-  const BASE_URL = "http://127.0.0.1:8000";
+  const BASE_URL = "https://api.tourtra.ma";
 
   const formatMAD = (v: string) => 
     new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD' }).format(parseFloat(v || '0'));
