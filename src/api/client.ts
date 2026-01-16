@@ -12,10 +12,10 @@ export const injectStore = (_store: MinimalStore) => {
   store = _store;
 };
 
-// 1. EXPORT THE ROOT URL (For Images)
-export const API_ROOT = 'https://api.tourtra.ma/'; 
+// 1. EXPORT THE ROOT URL (Updated for Production)
+export const API_ROOT = 'https://api.tourtra.ma'; 
 
-// 2. DEFINE API URL (For Requests)
+// 2. DEFINE API URL (This becomes https://api.tourtra.ma/api)
 const BASE_URL = `${API_ROOT}/api`;
 
 export const publicApi = axios.create({
@@ -51,6 +51,7 @@ safeApi.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
+        // Updated to use the new BASE_URL logic
         const response = await axios.post(`${BASE_URL}/token/refresh/`, {}, { withCredentials: true });
         const newAccessToken = response.data.access;
         store.dispatch({ type: 'auth/updateAccessToken', payload: newAccessToken });
