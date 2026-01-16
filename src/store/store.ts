@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { injectStore } from '../api/client'; // Import de la fonction d'injection
+import { injectStore } from '../api/client'; 
 
 // Reducers
 import userReducer from './slices/userSlice';
