@@ -196,7 +196,7 @@ export const Register = () => {
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/50 to-transparent"></div>
         <div className="relative z-10 mb-10">
           <h3 className="mb-4 text-2xl font-bold uppercase tracking-widest text-red-500 drop-shadow-sm">TOURTRA</h3>
           <h1 className="max-w-xl text-5xl font-extrabold leading-tight drop-shadow-lg">Construisez votre empire avec nous.</h1>
@@ -313,7 +313,7 @@ export const Register = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="w-full rounded-xl bg-gradient-to-br from-red-600 to-red-800 py-4 text-base font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-red-500/50 hover:scale-[1.01]"
+                  className="w-full rounded-xl bg-linear-to-br from-red-600 to-red-800 py-4 text-base font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-red-500/50 hover:scale-[1.01]"
                 >
                   Suivant
                 </button>
@@ -323,7 +323,7 @@ export const Register = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full rounded-xl bg-gradient-to-br from-red-600 to-red-800 py-4 text-base font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-red-500/50 hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full rounded-xl bg-linear-to-br from-red-600 to-red-800 py-4 text-base font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-red-500/50 hover:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Création en cours...' : 'Confirmer l\'inscription'}
                 </button>
