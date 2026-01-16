@@ -13,7 +13,7 @@ export const injectStore = (_store: MinimalStore) => {
 };
 
 // 1. EXPORT THE ROOT URL (For Images)
-export const API_ROOT = 'https://api.tourtra.ma'; 
+export const API_ROOT = 'https://api.tourtra.ma/'; 
 
 // 2. DEFINE API URL (For Requests)
 const BASE_URL = `${API_ROOT}/api`;
