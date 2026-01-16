@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import  { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, FileText, BadgeCheck, Search, LayoutPanelTop, 
-  Calendar, ChevronLeft, ChevronRight, X, Filter,
-  ArrowUpDown, CheckCircle2, AlertCircle, Clock, 
+  Filter,
+  CheckCircle2, Clock, 
   FileX, Download, Eye, Truck, Edit2
 } from 'lucide-react';
 
@@ -39,10 +39,10 @@ export const PurchaseOrdersPage = () => {
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate] = useState("");
+  const [endDate] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
-  const [sortBy, setSortBy] = useState<SortOption>('date_desc');
+  const [sortBy] = useState<SortOption>('date_desc');
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,9 +94,7 @@ export const PurchaseOrdersPage = () => {
     return result;
   }, [pos, searchTerm, startDate, endDate, statusFilter, sortBy]);
 
-  const totalPages = Math.ceil(processedPOs.length / itemsPerPage);
   const paginatedPOs = processedPOs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const hasActiveFilters = searchTerm !== "" || startDate !== "" || endDate !== "" || statusFilter !== 'ALL';
 
   // --- HANDLERS ---
   const handleView = (po: PurchaseOrder) => {
@@ -130,7 +128,7 @@ export const PurchaseOrdersPage = () => {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 lg:p-10 space-y-8 min-h-screen bg-[#f8f9fa] text-slate-800 font-sans">
+    <div className="max-w-400 mx-auto p-4 lg:p-10 space-y-8 min-h-screen bg-[#f8f9fa] text-slate-800 font-sans">
       
       {/* MODALS */}
       <CreatePOModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
@@ -201,7 +199,7 @@ export const PurchaseOrdersPage = () => {
           </div>
 
           {/* TABLE */}
-          <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden flex flex-col min-h-[600px]">
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col min-h-150">
               <div className="px-8 py-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                  <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Résultats</span>

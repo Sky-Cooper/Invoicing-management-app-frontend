@@ -1,6 +1,6 @@
-import React from 'react';
+
 import { 
-  X, Calendar, Hash, Briefcase, 
+   Calendar, Hash, Briefcase, 
   User, Clock, Receipt, ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,7 +29,7 @@ export const InvoiceDetailsModal = ({ isOpen, onClose, invoice }: Props) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-sans">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-6 font-sans">
           
           {/* Backdrop - Lighter & Blurred */}
           <motion.div 

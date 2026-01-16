@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Plus, Search, Building2, Eye, Fingerprint, 
   Trash2, Edit3, Briefcase, BadgeCheck, Hash, 
-  AlertTriangle, X
+  AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -55,12 +55,12 @@ export const ClientsPage = () => {
   );
 
   return (
-    <div className="max-w-[1600px] mx-auto p-6 lg:p-10 space-y-12 min-h-screen bg-slate-50/50">
+    <div className="max-w-400 mx-auto p-6 lg:p-10 space-y-12 min-h-screen bg-slate-50/50">
       
       {/* VIBRANT RED HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-slate-200/60">
         <div>
-            <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800 tracking-tighter uppercase">
+            <h1 className="text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-red-600 to-red-800 tracking-tighter uppercase">
             Répertoire <span className="text-slate-900">Identités</span>
             </h1>
             <p className="text-slate-500 font-medium mt-2 flex items-center gap-2 italic">
@@ -81,7 +81,7 @@ export const ClientsPage = () => {
           </div>
           <button 
             onClick={() => handleOpenEdit(null)} 
-            className="hidden md:flex bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] items-center gap-3 hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5 transition-all active:scale-95"
+            className="hidden md:flex bg-linear-to-r from-red-600 to-red-700 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] items-center gap-3 hover:shadow-lg hover:shadow-red-500/30 hover:-translate-y-0.5 transition-all active:scale-95"
           >
             <Plus size={20} strokeWidth={3} /> Nouveau
           </button>
@@ -99,13 +99,13 @@ export const ClientsPage = () => {
               exit={{ opacity: 0, scale: 0.95 }}
               className="group relative bg-white rounded-[2.5rem] p-1 shadow-sm hover:shadow-[0_20px_40px_-10px_rgba(220,38,38,0.15)] transition-all duration-300 border border-slate-100"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-br from-red-500/10 to-transparent rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="relative bg-white rounded-[2.3rem] overflow-hidden h-full flex flex-col sm:flex-row p-6 gap-8 z-10 group-hover:border-red-100/50 transition-colors">
                 
                 {/* Left Side: Photo / ID Box */}
                 <div className="w-full sm:w-40 shrink-0 flex flex-col gap-4">
-                  <div className="w-full aspect-square bg-gradient-to-br from-red-50 to-white rounded-2xl border-2 border-white shadow-inner flex items-center justify-center relative overflow-hidden group-hover:from-red-100 transition-colors">
+                  <div className="w-full aspect-square bg-linear-to-br from-red-50 to-white rounded-2xl border-2 border-white shadow-inner flex items-center justify-center relative overflow-hidden group-hover:from-red-100 transition-colors">
                     <Building2 size={56} className="text-red-200 group-hover:text-red-400 transition-colors drop-shadow-sm" />
                     <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-sm border border-red-100">
                       <Fingerprint size={18} className="text-red-600" />
@@ -218,7 +218,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, clientName }: { i
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-300 flex items-center justify-center p-4">
       {/* Backdrop */}
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -230,7 +230,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, clientName }: { i
         initial={{ scale: 0.9, opacity: 0, y: 20 }} 
         animate={{ scale: 1, opacity: 1, y: 0 }} 
         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-        className="relative bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl border border-red-100 overflow-hidden"
+        className="relative bg-white rounded-4xl p-8 w-full max-w-md shadow-2xl border border-red-100 overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-[100%] -mr-10 -mt-10 z-0" />
         

@@ -1,8 +1,8 @@
-import React from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { 
-  X, Edit3, Building2, MapPin, 
+   Edit3, Building2, MapPin, 
   Briefcase, Hash, Calendar, FileText, 
   Download, UserCheck, Phone, Mail, HardHat
 } from 'lucide-react';
@@ -54,7 +54,7 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-10">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 lg:p-10">
           {/* Overlay */}
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -71,7 +71,7 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
           >
             
             {/* LEFT SECTION: Visual Identity */}
-            <div className="w-full lg:w-96 bg-gradient-to-br from-slate-900 to-slate-800 p-10 flex flex-col items-center text-center text-white shrink-0 relative overflow-hidden">
+            <div className="w-full lg:w-96 bg-linear-to-br from-slate-900 to-slate-800 p-10 flex flex-col items-center text-center text-white shrink-0 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
               
               <div className="relative group z-10">
@@ -127,7 +127,7 @@ export const ChantierDetailsModal = ({ isOpen, onClose, chantier, onEdit }: Prop
                     <DataCard label="Date Signature" value={chantier.contract_date} icon={<Calendar size={14}/>} />
                     <DataCard label="Période" value={`${chantier.start_date} ➝ ${chantier.end_date || 'En cours'}`} icon={<Calendar size={14}/>} />
                   </div>
-                  <div className="mt-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                  <div className="mt-6 bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Description Technique</p>
                       <p className="text-sm text-slate-600 font-medium leading-relaxed">
                           {chantier.description || "Aucune description technique disponible."}

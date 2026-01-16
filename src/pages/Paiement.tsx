@@ -143,9 +143,9 @@ export const PaymentsPage = () => {
       {/* Feedback Modal */}
       <AnimatePresence>
         {feedbackModal.isOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setFeedbackModal({...feedbackModal, isOpen: false})} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-[32px] p-8 shadow-2xl w-full max-w-md relative z-10 text-center space-y-6">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-4xl p-8 shadow-2xl w-full max-w-md relative z-10 text-center space-y-6">
               <div className={`h-20 w-20 mx-auto rounded-full flex items-center justify-center ${feedbackModal.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                 {feedbackModal.type === 'success' ? <CheckCircle2 size={40} /> : <AlertCircle size={40} />}
               </div>
@@ -159,7 +159,7 @@ export const PaymentsPage = () => {
         )}
       </AnimatePresence>
 
-      <main className="max-w-[1600px] mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="max-w-400 mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* 1. LEFT: LIST */}
         <div className="lg:col-span-4 flex flex-col gap-6 h-[calc(100vh-120px)] sticky top-8 text-left">
@@ -195,7 +195,7 @@ export const PaymentsPage = () => {
         <div className="lg:col-span-5">
           <AnimatePresence mode="wait">
             {selectedInvoice ? (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden sticky top-8">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-4xl shadow-2xl border border-slate-100 overflow-hidden sticky top-8">
                 <div className={`p-8 text-white relative transition-colors duration-500 ${isEditing ? 'bg-blue-600' : 'bg-slate-900'}`}>
                   <div className="relative z-10 text-left">
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
@@ -230,7 +230,7 @@ export const PaymentsPage = () => {
                     </div>
                     <div className="relative">
                       <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-rose-500" size={28} />
-                      <input type="number" step="0.01" required className="w-full pl-16 pr-8 py-6 bg-slate-50 border-2 border-transparent rounded-[24px] text-4xl font-black text-slate-900 focus:bg-white focus:border-rose-500 outline-none" value={payData.amount} onChange={e => setPayData({...payData, amount: e.target.value})} />
+                      <input type="number" step="0.01" required className="w-full pl-16 pr-8 py-6 bg-slate-50 border-2 border-transparent rounded-3xl text-4xl font-black text-slate-900 focus:bg-white focus:border-rose-500 outline-none" value={payData.amount} onChange={e => setPayData({...payData, amount: e.target.value})} />
                     </div>
                   </div>
 
@@ -266,7 +266,7 @@ export const PaymentsPage = () => {
                 </form>
               </motion.div>
             ) : (
-              <div className="h-full min-h-[600px] flex flex-col items-center justify-center p-12 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100 sticky top-8">
+              <div className="h-full min-h-150 flex flex-col items-center justify-center p-12 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100 sticky top-8">
                 <Wallet size={40} className="text-slate-200 mb-6" />
                 <h3 className="text-xl font-black text-slate-800">Sélectionnez une facture</h3>
                 <p className="text-slate-400 text-sm mt-2">Choisissez un document à gauche pour traiter le paiement.</p>
@@ -277,7 +277,7 @@ export const PaymentsPage = () => {
 
         {/* 3. RIGHT: HISTORY */}
         <div className="lg:col-span-3 space-y-8 sticky top-8 text-left">
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+          <div className="bg-white rounded-4xl p-8 shadow-sm border border-slate-100">
             <h3 className="font-black text-xs uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-2">
               <Clock size={14} /> Historique
             </h3>

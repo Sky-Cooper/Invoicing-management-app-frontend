@@ -117,7 +117,7 @@ const AssignmentModal = ({ isOpen, onClose, initialData }: AssignmentModalProps)
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/95 backdrop-blur-md p-2 sm:p-4 font-sans text-slate-900">
+      <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/95 backdrop-blur-md p-2 sm:p-4 font-sans text-slate-900">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -249,7 +249,7 @@ const AssignmentModal = ({ isOpen, onClose, initialData }: AssignmentModalProps)
                 <button
                   type="submit"
                   disabled={isLoading || success}
-                  className={`min-w-[300px] py-6 px-10 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-2xl
+                  className={`min-w-75 py-6 px-10 rounded-4xl font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-2xl
                     ${success ? 'bg-green-600 text-white' : 'bg-slate-950 text-white hover:bg-slate-800'}
                     disabled:opacity-50`}
                 >
@@ -283,7 +283,7 @@ const SelectField = ({ label, icon, value, onChange, options, required, error }:
       <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-950 z-10 pointer-events-none">{icon}</div>
       <select 
         required={required}
-        className={`w-full pl-16 pr-12 py-5 rounded-[2rem] bg-slate-50 border-2 outline-none font-bold text-sm appearance-none cursor-pointer text-slate-900 shadow-inner
+        className={`w-full pl-16 pr-12 py-5 rounded-4xl bg-slate-50 border-2 outline-none font-bold text-sm appearance-none cursor-pointer text-slate-900 shadow-inner
           ${error ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-slate-950/20 focus:bg-white'}`}
         value={value || ''} 
         onChange={(e) => onChange(e.target.value)}
@@ -310,7 +310,7 @@ const InputField = ({ label, icon, value, onChange, type = "text", required = fa
       <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-950 transition-colors">{icon}</div>
       <input 
         type={type} required={required}
-        className={`w-full pl-16 pr-6 py-5 rounded-[2rem] bg-slate-50 border-2 outline-none font-bold text-sm transition-all text-slate-900 shadow-inner
+        className={`w-full pl-16 pr-6 py-5 rounded-4xl bg-slate-50 border-2 outline-none font-bold text-sm transition-all text-slate-900 shadow-inner
           ${error ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-slate-950/20 focus:bg-white'}`}
         value={value || ''} onChange={(e) => onChange(e.target.value)}
       />

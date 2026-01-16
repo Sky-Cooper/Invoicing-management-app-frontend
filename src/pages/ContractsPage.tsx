@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import  { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, FileText, Search, Calendar, ChevronLeft, ChevronRight, 
@@ -83,7 +83,7 @@ export const ContractsPage = () => {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 lg:p-10 space-y-8 min-h-screen bg-[#f8f9fa] text-slate-800 font-sans">
+    <div className="max-w-400 mx-auto p-4 lg:p-10 space-y-8 min-h-screen bg-[#f8f9fa] text-slate-800 font-sans">
       
       {/* Modal */}
       <AnimatePresence>
@@ -154,7 +154,7 @@ export const ContractsPage = () => {
                   key={contract.id} 
                   initial={{ opacity: 0, scale: 0.95 }} 
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                  className="bg-white rounded-4xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
                 >
                   {/* Top Row: Employee & Status */}
                   <div className="flex justify-between items-start mb-6">

@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Calendar, UserCheck, HardHat, Check, X, 
   Loader2, Filter, Building2, Users,
-  AlertTriangle, FileText, Download, ChevronRight, File
+  AlertTriangle, FileText, Download, File
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,12 +37,12 @@ const ReportsModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => voi
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
       >
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -331,7 +331,7 @@ export const AttendancesPage = () => {
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         
         {/* HEADER */}
-        <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+        <div className="bg-white rounded-4xl p-6 md:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
             <div className="max-w-xl">
@@ -339,7 +339,7 @@ export const AttendancesPage = () => {
                 <UserCheck size={12} /> Pointage Journalier
               </div>
               <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-3">
-                Suivi de <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Présence</span>
+                Suivi de <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">Présence</span>
               </h1>
               <p className="text-slate-400 font-medium text-sm leading-relaxed">
                 Gérez les entrées et sorties des employés sur chantier pour la date du <span className="text-slate-900 font-bold">{selectedDate}</span>.

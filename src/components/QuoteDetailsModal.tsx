@@ -1,8 +1,7 @@
-import React from 'react';
 import { 
   X, Calendar, Hash, Briefcase, 
   User, Clock, FileText, ShieldCheck,
-  Building2, Percent, Printer, Download
+   Printer, Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Quote } from '../store/slices/quoteSlice';
@@ -30,7 +29,7 @@ export const QuoteDetailsModal = ({ isOpen, onClose, quote }: Props) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-sans">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-6 font-sans">
           
           {/* Backdrop */}
           <motion.div 
@@ -44,7 +43,7 @@ export const QuoteDetailsModal = ({ isOpen, onClose, quote }: Props) => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-4xl bg-white rounded-[24px] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
+            className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
           >
             
             {/* TOP HEADER */}

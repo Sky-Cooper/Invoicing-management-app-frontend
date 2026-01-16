@@ -29,7 +29,6 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
   // 1. DATA FROM STORE (Safe Selectors)
   const clients = useAppSelector((state) => state.clients?.items || []);
   const chantiers = useAppSelector((state) => state.chantiers?.items || []);
-  const catalogItems = useAppSelector((state) => state.items?.items || []);
   const { isLoading } = useAppSelector((state) => state.invoices);
 
   // 2. FORCE DATA FETCH ON OPEN (Fixes the "Missing Info" bug)
@@ -181,7 +180,7 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
+    <div className="fixed inset-0 z-250 flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0" />
       
       <motion.div 
@@ -189,7 +188,7 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
         className="relative w-full max-w-7xl bg-[#fcfcfc] border border-white rounded-[3.5rem] shadow-[0_30px_100px_-20px_rgba(220,38,38,0.4)] overflow-hidden mt-10 mb-10 flex flex-col"
       >
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0">
+        <div className="bg-linear-to-r from-red-600 via-red-700 to-red-800 p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
           
           <div className="flex items-center gap-6 relative z-10">
@@ -456,7 +455,7 @@ export const InvoiceEditModal = ({ isOpen, onClose, invoice }: Props) => {
           <button type="button" onClick={onClose} className="px-10 py-5 text-slate-400 hover:text-red-600 font-black uppercase text-xs tracking-[0.2em] transition-colors">
             Fermer
           </button>
-          <button onClick={handleUpdate} disabled={isLoading} className="bg-gradient-to-r from-slate-900 to-slate-800 hover:from-red-600 hover:to-red-700 text-white px-16 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] flex items-center gap-4 transition-all shadow-2xl active:scale-95 group disabled:opacity-50">
+          <button onClick={handleUpdate} disabled={isLoading} className="bg-linear-to-r from-slate-900 to-slate-800 hover:from-red-600 hover:to-red-700 text-white px-16 py-5 rounded-4xl font-black uppercase text-xs tracking-[0.2em] flex items-center gap-4 transition-all shadow-2xl active:scale-95 group disabled:opacity-50">
             {isLoading ? <Loader2 className="animate-spin" size={20}/> : <Save size={20} className="group-hover:scale-110 transition-transform" />} Enregistrer Corrections
           </button>
         </div>

@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Plus, Search, HardHat, Calendar, 
   CheckCircle2, User, Loader2, Pencil, Trash2,
-  AlertTriangle, X // [NEW] Icons for the delete modal
-} from 'lucide-react';
+  AlertTriangle} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion'; // Using Framer Motion for smooth animations
 
 // Redux
@@ -66,7 +65,7 @@ export const AssignmentsPage = () => {
   );
 
   return (
-    <div className="max-w-[1600px] mx-auto p-8 space-y-10 relative">
+    <div className="max-w-400 mx-auto p-8 space-y-10 relative">
       
       {/* HEADER DE LA PAGE */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
@@ -225,7 +224,7 @@ export const AssignmentsPage = () => {
       {/* [NEW] CUSTOM DELETE CONFIRMATION MODAL */}
       <AnimatePresence>
         {deleteId && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-150 flex items-center justify-center p-4">
             {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
@@ -240,7 +239,7 @@ export const AssignmentsPage = () => {
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full border border-slate-100 overflow-hidden"
+              className="relative bg-white rounded-4xl shadow-2xl p-8 max-w-md w-full border border-slate-100 overflow-hidden"
             >
               {/* Decorative Background Element */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-50 pointer-events-none" />

@@ -64,7 +64,7 @@ const ItemModal = ({ isOpen, onClose, initialData }: ItemModalProps) => {
   return (
     <AnimatePresence>
       {/* Overlay optimisé pour la visibilité de l'en-tête */}
-      <div className="fixed inset-0 z-[150] flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
+      <div className="fixed inset-0 z-150 flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -74,13 +74,13 @@ const ItemModal = ({ isOpen, onClose, initialData }: ItemModalProps) => {
           className="bg-white rounded-[3rem] w-full max-w-4xl mt-20 mb-12 overflow-hidden shadow-[0_40px_100px_-15px_rgba(220,38,38,0.35)] ring-1 ring-white/50 relative"
         >
           {/* HEADER ROUGE VIBRANT - Identité TOURTRA */}
-          <div className="bg-gradient-to-br from-[#dc2626] via-[#b91c1c] to-[#991b1b] p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0 shadow-lg">
+          <div className="bg-linear-to-br from-[#dc2626] via-[#b91c1c] to-[#991b1b] p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0 shadow-lg">
             {/* Effets visuels de fond pour le dynamisme */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/20 rounded-full -ml-12 -mb-12 blur-2xl pointer-events-none" />
             
             <div className="flex items-center gap-6 relative z-10">
-              <div className="p-4 bg-white/20 rounded-[1.5rem] backdrop-blur-md border border-white/30 shadow-[inset_0_0_15px_rgba(255,255,255,0.2)]">
+              <div className="p-4 bg-white/20 rounded-3xl backdrop-blur-md border border-white/30 shadow-[inset_0_0_15px_rgba(255,255,255,0.2)]">
                 <Package className="text-white drop-shadow-md" size={32} />
               </div>
               <div>
@@ -183,7 +183,7 @@ const ItemModal = ({ isOpen, onClose, initialData }: ItemModalProps) => {
               <button 
                   type="button" 
                   onClick={onClose} 
-                  className="px-10 py-5 font-black text-[11px] uppercase tracking-widest text-slate-400 hover:text-red-600 transition-all hover:bg-red-50 rounded-[2rem]"
+                  className="px-10 py-5 font-black text-[11px] uppercase tracking-widest text-slate-400 hover:text-red-600 transition-all hover:bg-red-50 rounded-4xl"
               >
                   Annuler
               </button>
@@ -193,7 +193,7 @@ const ItemModal = ({ isOpen, onClose, initialData }: ItemModalProps) => {
                   className={`min-w-[320px] py-6 px-10 rounded-[2.2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-[0_20px_40px_-15px_rgba(220,38,38,0.4)] hover:-translate-y-1 active:scale-95 relative overflow-hidden group
                   ${success 
                       ? 'bg-emerald-600 text-white shadow-emerald-500/30' 
-                      : 'bg-gradient-to-br from-red-600 to-red-800 text-white shadow-red-500/40'}`}
+                      : 'bg-linear-to-br from-red-600 to-red-800 text-white shadow-red-500/40'}`}
               >
                   <div className="absolute inset-0 bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                   

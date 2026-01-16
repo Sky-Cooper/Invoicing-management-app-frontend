@@ -108,7 +108,7 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4">
+      <div className="fixed inset-0 z-150 flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -116,11 +116,11 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
           className="bg-white rounded-[3.5rem] w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden shadow-[0_30px_70px_-15px_rgba(220,38,38,0.25)] border border-white"
         >
           {/* HEADER VIBRANT ROUGE TOURTRA */}
-          <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 px-10 py-10 flex justify-between items-center shrink-0 relative overflow-hidden">
+          <div className="bg-linear-to-r from-red-600 via-red-700 to-red-800 px-10 py-10 flex justify-between items-center shrink-0 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
             
             <div className="flex items-center gap-6 relative z-10">
-              <div className="p-4 bg-white/20 rounded-[1.5rem] backdrop-blur-md border border-white/30 shadow-inner">
+              <div className="p-4 bg-white/20 rounded-3xl backdrop-blur-md border border-white/30 shadow-inner">
                 <Fingerprint className="text-white" size={32} />
               </div>
               <div>
@@ -181,7 +181,7 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
                   <Building2 size={72} className="group-hover:text-red-400 transition-colors drop-shadow-sm relative z-10" />
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-red-500 relative z-10">PROFIL CLIENT</span>
                 </div>
-                <div className="w-full h-1 bg-gradient-to-r from-transparent via-red-200 to-transparent opacity-30" />
+                <div className="w-full h-1 bg-linear-to-r from-transparent via-red-200 to-transparent opacity-30" />
                 <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">Identité Numérique</p>
               </div>
 
@@ -216,7 +216,7 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
                           type="text" 
                           required
                           placeholder="+212 6XXXXXXXX"
-                          className={`w-full pl-16 pr-6 py-5 rounded-[2rem] bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm
+                          className={`w-full pl-16 pr-6 py-5 rounded-4xl bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm
                             ${getFieldError('phone') ? 'border-red-400 bg-red-50' : formData.phone?.length === 13 ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`}
                           value={formData.phone} 
                           onChange={(e) => handlePhoneChange(e.target.value)}
@@ -254,7 +254,7 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
                   </div>
 
                   {/* Encart Ma Société (TOURTRA Auto-link) */}
-                  <div className="bg-red-50/40 border-2 border-red-100/60 rounded-[2rem] p-6 flex items-center justify-between group hover:border-red-200 transition-all shadow-sm">
+                  <div className="bg-red-50/40 border-2 border-red-100/60 rounded-4xl p-6 flex items-center justify-between group hover:border-red-200 transition-all shadow-sm">
                     <div className="flex items-center gap-5">
                         <div className="w-14 h-14 rounded-2xl bg-white border border-red-100 flex items-center justify-center text-red-600 shadow-sm transition-transform group-hover:scale-105">
                             <Globe size={28} />
@@ -305,8 +305,8 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
                 type="submit"
                 onClick={handleSubmit}
                 disabled={isCreating || isUpdating || success}
-                className={`min-w-[340px] py-6 px-10 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-xl hover:-translate-y-1 active:scale-95
-                  ${success ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-500/40 hover:shadow-red-500/60'}
+                className={`min-w-85 py-6 px-10 rounded-4xl font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-xl hover:-translate-y-1 active:scale-95
+                  ${success ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-linear-to-r from-red-600 to-red-800 text-white shadow-red-500/40 hover:shadow-red-500/60'}
                   disabled:opacity-50`}
               >
                 {isCreating || isUpdating ? <Loader2 className="animate-spin" size={20} /> : success ? <CheckCircle2 size={20} /> : null}
@@ -325,7 +325,7 @@ const ClientModal = ({ isOpen, onClose, initialData }: ClientModalProps) => {
 const SectionHeader = ({ title }: { title: string }) => (
   <div className="flex items-center gap-6">
     <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] whitespace-nowrap">{title}</h3>
-    <div className="h-[2px] w-full bg-gradient-to-r from-red-100 to-transparent rounded-full" />
+    <div className="h-0.5 w-full bg-linear-to-r from-red-100 to-transparent rounded-full" />
   </div>
 );
 
@@ -339,7 +339,7 @@ const InputField = ({ label, icon, value, onChange, type = "text", required = fa
       <input 
         type={type} 
         required={required}
-        className={`w-full pl-16 pr-6 py-5 rounded-[2rem] bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm
+        className={`w-full pl-16 pr-6 py-5 rounded-4xl bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm
           ${error ? 'border-red-400 bg-red-50' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`}
         value={value || ''} 
         onChange={(e) => onChange(e.target.value)}

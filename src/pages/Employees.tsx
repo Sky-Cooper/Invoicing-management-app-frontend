@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import  { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Plus, Search, User, Fingerprint, Trash2, Edit3, 
-  BadgeCheck, Hash, Globe, Mail, CalendarDays, Loader2,
+  BadgeCheck, Hash, Globe, Mail, CalendarDays,
   UserX, ShieldAlert, AlertTriangle // [NEW] Added AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -63,7 +63,7 @@ export const EmployeesPage = () => {
   }, [employees, searchTerm]);
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 lg:p-10 space-y-10 min-h-screen bg-[#FDFDFD]">
+    <div className="max-w-400 mx-auto p-4 lg:p-10 space-y-10 min-h-screen bg-[#FDFDFD]">
       
       {/* SECTION HEADER */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -132,7 +132,7 @@ export const EmployeesPage = () => {
       {/* [NEW] CUSTOM DELETE CONFIRMATION MODAL */}
       <AnimatePresence>
         {deleteId && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-150 flex items-center justify-center p-4">
             {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
@@ -147,7 +147,7 @@ export const EmployeesPage = () => {
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative bg-white rounded-[2rem] shadow-2xl p-8 max-w-md w-full border border-slate-100 overflow-hidden"
+              className="relative bg-white rounded-4xl shadow-2xl p-8 max-w-md w-full border border-slate-100 overflow-hidden"
             >
               {/* Decorative Background Element */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-50 pointer-events-none" />
@@ -222,7 +222,7 @@ const EmployeeCard = ({ employee, companyName, onView, onEdit, onDelete }: any) 
       <div className="flex flex-col sm:flex-row p-6 gap-8">
           {/* Section Visuelle (Gauche) */}
           <div className="w-full sm:w-40 shrink-0 flex flex-col gap-4">
-              <div className="w-full aspect-[3/4] bg-slate-50 rounded-2xl border border-slate-100 shadow-inner flex items-center justify-center relative overflow-hidden group-hover:bg-red-50/30 transition-colors">
+              <div className="w-full aspect-3/4 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner flex items-center justify-center relative overflow-hidden group-hover:bg-red-50/30 transition-colors">
                   <User size={64} strokeWidth={1} className="text-slate-200 group-hover:text-red-200 transition-colors" />
                   <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-sm border border-slate-100">
                       <Fingerprint size={16} className="text-red-600" />
@@ -303,7 +303,7 @@ const InfoPill = ({ icon, value }: any) => (
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-[2.5rem] p-6 h-64 border border-slate-100 animate-pulse flex gap-8">
-    <div className="w-40 aspect-[3/4] bg-slate-100 rounded-2xl" />
+    <div className="w-40 aspect-3/4 bg-slate-100 rounded-2xl" />
     <div className="flex-1 space-y-4">
       <div className="h-8 bg-slate-100 rounded-lg w-1/2" />
       <div className="grid grid-cols-2 gap-4">

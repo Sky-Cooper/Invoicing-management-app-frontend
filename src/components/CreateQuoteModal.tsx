@@ -140,7 +140,7 @@ export const CreateQuoteModal = ({ isOpen, onClose }: CreateQuoteModalProps) => 
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 font-sans">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 font-sans">
       
       {/* Backdrop */}
       <motion.div 
@@ -156,7 +156,7 @@ export const CreateQuoteModal = ({ isOpen, onClose }: CreateQuoteModalProps) => 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-5xl bg-white rounded-[24px] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
+        className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
       >
         
         {/* --- HEADER --- */}

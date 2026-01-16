@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
-  UserPlus, Mail, Phone, ShieldCheck, Building2, 
-  Search, Trash2, Edit2, Users, MoreHorizontal, AlertTriangle, X 
+  UserPlus, Mail, Phone ,Building2, 
+  Search, Trash2, Edit2, Users, MoreHorizontal, AlertTriangle, 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchDeptAdmins, deleteDeptAdmin } from '../store/slices/deptAdminSlice';
@@ -16,7 +16,7 @@ import { EditAdminModal } from '../components/EditAdminModal';
 
 export const DepartmentAdminsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { admins, isLoading } = useSelector((state: RootState) => state.deptAdmins);
+  const { admins } = useSelector((state: RootState) => state.deptAdmins);
   const { items: departments } = useSelector((state: RootState) => state.departments);
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,12 +66,12 @@ export const DepartmentAdminsPage = () => {
   );
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 md:p-8 space-y-10">
+    <div className="max-w-400 mx-auto p-4 md:p-8 space-y-10">
       
       {/* 1. Header Haute Fidélité */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-[0.1em]">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest">
             <Users size={12} />
             Système d'administration
           </div>
@@ -99,7 +99,7 @@ export const DepartmentAdminsPage = () => {
           <input 
             type="text"
             placeholder="Rechercher un administrateur par nom, email..."
-            className="w-full rounded-[1.5rem] border border-slate-100 bg-white py-4 pl-14 pr-6 text-sm font-medium outline-none shadow-sm focus:ring-4 focus:ring-red-500/5 transition-all"
+            className="w-full rounded-3xl border border-slate-100 bg-white py-4 pl-14 pr-6 text-sm font-medium outline-none shadow-sm focus:ring-4 focus:ring-red-500/5 transition-all"
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>

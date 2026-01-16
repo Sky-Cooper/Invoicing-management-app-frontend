@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, AreaChart, Area, 
+  PieChart, Pie, Cell 
 } from 'recharts';
 import { 
   Activity, Search, Bell, Settings as SettingsIcon, Globe, Smartphone, Store, UserCheck, ChevronRight
@@ -43,7 +43,7 @@ export const DashboardPage = () => {
   const { summary, project_performance, expense_by_category } = basic;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 lg:p-8 space-y-8 max-w-[1600px] mx-auto text-left">
+    <div className="min-h-screen bg-[#F8FAFC] p-4 lg:p-8 space-y-8 max-w-400 mx-auto text-left">
       
       {/* 1. MINIMAL HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -62,7 +62,7 @@ export const DashboardPage = () => {
       </div>
 
       {/* 2. KPI GRID - FIXED OVERFLOW */}
-      <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-slate-200/60 overflow-hidden relative">
+      <div className="bg-white rounded-4xl p-6 lg:p-8 shadow-sm border border-slate-200/60 overflow-hidden relative">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 relative z-10">
           
           <MainKpiCard 
@@ -170,7 +170,7 @@ export const DashboardPage = () => {
               <div key={idx} className="flex justify-between items-center text-[11px] font-bold">
                 <span className="text-slate-500 uppercase flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{backgroundColor: CHART_COLORS[idx]}} /> 
-                  <span className="truncate max-w-[100px]">{item.category}</span>
+                  <span className="truncate max-w-25">{item.category}</span>
                 </span>
                 <span className="text-slate-900">{formatCompact(item.total_amount)} <span className="text-slate-400 text-[9px]">DH</span></span>
               </div>
@@ -229,7 +229,7 @@ const StatCard = ({ label, value, unit, tag, color, icon }: any) => {
 };
 
 const ChartContainer = ({ title, sub, children, className }: any) => (
-  <div className={`bg-white rounded-[2rem] p-8 border border-slate-200/60 shadow-sm ${className}`}>
+  <div className={`bg-white rounded-4xl p-8 border border-slate-200/60 shadow-sm ${className}`}>
     <div className="flex justify-between items-start">
       <div>
         <h3 className="font-black text-slate-800 uppercase tracking-tight text-sm">{title}</h3>

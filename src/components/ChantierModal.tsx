@@ -149,7 +149,7 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4 font-sans text-slate-900">
+      <div className="fixed inset-0 z-150 flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4 font-sans text-slate-900">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -157,10 +157,10 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
           className="bg-white rounded-[3.5rem] w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden shadow-[0_30px_70px_-15px_rgba(220,38,38,0.25)] border border-white"
         >
           {/* HEADER */}
-          <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 px-10 py-10 flex justify-between items-center shrink-0 relative overflow-hidden">
+          <div className="bg-linear-to-r from-red-600 via-red-700 to-red-800 px-10 py-10 flex justify-between items-center shrink-0 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
             <div className="flex items-center gap-6 relative z-10">
-              <div className="p-4 bg-white/20 rounded-[1.5rem] backdrop-blur-md border border-white/30 shadow-inner">
+              <div className="p-4 bg-white/20 rounded-3xl backdrop-blur-md border border-white/30 shadow-inner">
                 <HardHat className="text-white" size={32} />
               </div>
               <div>
@@ -189,7 +189,7 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Documents & Marchés</p>
                       
                       {/* UPLOAD ZONE */}
-                      <div className="relative aspect-[4/3] w-full">
+                      <div className="relative aspect-4/3 w-full">
                          <label className="absolute inset-0 flex flex-col items-center justify-center p-6 rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-white hover:border-red-300 hover:bg-red-50/10 transition-all cursor-pointer group z-10">
                             
                             {/* STANDARD FILE INPUT (Hidden) */}
@@ -214,7 +214,7 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
                       </div>
 
                       {/* FILE LIST */}
-                      <div className="flex flex-col gap-2 mt-4 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
+                      <div className="flex flex-col gap-2 mt-4 max-h-75 overflow-y-auto pr-2 no-scrollbar">
                          {uploadedFiles.length > 0 ? (
                             uploadedFiles.map((file, index) => (
                                 <div key={index} className="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-slate-100 animate-in fade-in slide-in-from-left-4">
@@ -277,7 +277,7 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
                         <label className="text-[10px] font-black uppercase text-slate-400 ml-6 tracking-[0.2em]">Ma Société</label>
                         <div className="relative">
                           <div className="absolute left-6 top-1/2 -translate-y-1/2 text-red-600"><Globe size={20}/></div>
-                          <input readOnly className="w-full pl-16 pr-6 py-5 rounded-[2rem] bg-red-50/50 border-2 border-red-100 font-bold text-sm text-red-900 cursor-not-allowed shadow-inner" value={userProfile?.company_name || "TOURTRA SARL"} />
+                          <input readOnly className="w-full pl-16 pr-6 py-5 rounded-4xl bg-red-50/50 border-2 border-red-100 font-bold text-sm text-red-900 cursor-not-allowed shadow-inner" value={userProfile?.company_name || "TOURTRA SARL"} />
                         </div>
                       </div>
                     </div>
@@ -314,7 +314,7 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
                              {isLoadingAdmins ? <Loader2 className="animate-spin" size={20}/> : <ShieldCheck size={20}/>}
                            </div>
                            <select 
-                             className="w-full pl-16 pr-12 py-5 rounded-[2rem] bg-white border-2 border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5 outline-none font-bold text-sm appearance-none cursor-pointer text-slate-700 shadow-sm"
+                             className="w-full pl-16 pr-12 py-5 rounded-4xl bg-white border-2 border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5 outline-none font-bold text-sm appearance-none cursor-pointer text-slate-700 shadow-sm"
                              onChange={(e) => handleAddResponsible(e.target.value)}
                              value=""
                            >
@@ -369,7 +369,7 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
               <div className="flex items-center gap-6 w-full md:w-auto">
                 <button type="button" onClick={onClose} className="px-8 py-5 font-black text-[10px] uppercase tracking-[0.3em] text-slate-400 hover:text-red-600 transition-colors">Abandonner</button>
                 <button type="submit" disabled={isCreating || isUpdating || success}
-                  className={`min-w-[340px] py-6 px-10 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-xl hover:-translate-y-1 active:scale-95 ${success ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-500/40 hover:shadow-red-500/60'} disabled:opacity-50`}>
+                  className={`min-w-85 py-6 px-10 rounded-4xl font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-xl hover:-translate-y-1 active:scale-95 ${success ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-linear-to-r from-red-600 to-red-800 text-white shadow-red-500/40 hover:shadow-red-500/60'} disabled:opacity-50`}>
                   {isCreating || isUpdating ? <Loader2 className="animate-spin" size={20} /> : success ? <CheckCircle2 size={20} /> : null}
                   {success ? 'Configuration Validée' : initialData ? 'Mettre à jour le Dossier' : 'Ouvrir le Chantier'}
                 </button>
@@ -384,14 +384,14 @@ const ChantierModal = ({ isOpen, onClose, initialData }: ChantierModalProps) => 
 
 // --- SUB-COMPONENTS ---
 const SectionHeader = ({ title }: { title: string }) => (
-  <div className="flex items-center gap-6"><h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] whitespace-nowrap">{title}</h3><div className="h-[2px] w-full bg-gradient-to-r from-red-100 to-transparent rounded-full" /></div>
+  <div className="flex items-center gap-6"><h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] whitespace-nowrap">{title}</h3><div className="h-0.5 w-full bg-linear-to-r from-red-100 to-transparent rounded-full" /></div>
 );
 const SelectField = ({ label, icon, value, onChange, options, required, error }: any) => (
   <div className="space-y-2 flex-1 group relative">
     <label className="text-[10px] font-black uppercase text-slate-400 ml-6 tracking-[0.2em] group-focus-within:text-red-600 transition-colors">{label} {required && <span className="text-red-600">*</span>}</label>
     <div className="relative">
       <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-red-600 z-10 pointer-events-none">{icon}</div>
-      <select required={required} className={`w-full pl-16 pr-12 py-5 rounded-[2rem] bg-white border-2 outline-none font-bold text-sm appearance-none cursor-pointer text-slate-700 shadow-sm ${error ? 'border-red-400 bg-red-50' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`} value={value || ''} onChange={(e) => onChange(e.target.value)}>
+      <select required={required} className={`w-full pl-16 pr-12 py-5 rounded-4xl bg-white border-2 outline-none font-bold text-sm appearance-none cursor-pointer text-slate-700 shadow-sm ${error ? 'border-red-400 bg-red-50' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`} value={value || ''} onChange={(e) => onChange(e.target.value)}>
         <option value="" disabled>Sélectionner...</option>
         {options.map((opt: any) => (<option key={opt.id} value={opt.id}>{opt.name}</option>))}
       </select>
@@ -405,7 +405,7 @@ const InputField = ({ label, icon, value, onChange, type = "text", required = fa
     <label className="text-[10px] font-black uppercase text-slate-400 ml-6 tracking-[0.2em] group-focus-within:text-red-600 transition-colors">{label} {required && <span className="text-red-600">*</span>}</label>
     <div className="relative">
       <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-red-600 transition-colors">{icon}</div>
-      <input type={type} required={required} className={`w-full pl-16 pr-6 py-5 rounded-[2rem] bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm ${error ? 'border-red-400 bg-red-50' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`} value={value || ''} onChange={(e) => onChange(e.target.value)} />
+      <input type={type} required={required} className={`w-full pl-16 pr-6 py-5 rounded-4xl bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm ${error ? 'border-red-400 bg-red-50' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`} value={value || ''} onChange={(e) => onChange(e.target.value)} />
       {error && <p className="mt-2 text-[9px] font-black text-red-500 uppercase italic ml-6 leading-none">{error}</p>}
     </div>
   </div>

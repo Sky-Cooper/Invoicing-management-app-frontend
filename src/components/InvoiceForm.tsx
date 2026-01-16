@@ -253,7 +253,7 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
 
           {/* RIGHT COLUMN: ITEMS & TOTALS */}
           <div className="lg:col-span-8 space-y-6">
-             <div className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm min-h-[400px] flex flex-col">
+             <div className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm min-h-100 flex flex-col">
                 <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
                     <h3 className="font-black text-slate-800 uppercase text-xs tracking-widest flex items-center gap-2">
                         <BadgeCheck size={16} className="text-red-600"/> Lignes de prestations
@@ -374,7 +374,7 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
 
       <div className="flex justify-end items-center gap-6 pt-4 border-t border-slate-100">
         {error && <p className="text-red-500 font-bold text-xs bg-red-50 px-4 py-2 rounded-lg">{typeof error === 'string' ? error : 'Erreur de validation'}</p>}
-        <button type="button" onClick={onCancel} className="px-8 py-4 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all">
+        <button type="button" onClick={onCancel} className="px-8 py-4 rounded-4xl font-black uppercase text-[10px] tracking-[0.2em] text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all">
             Abandonner
         </button>
         <button type="submit" disabled={isLoading} className="bg-red-600 text-white px-10 py-5 rounded-[2.5rem] font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 shadow-xl shadow-red-600/30 hover:bg-red-700 hover:scale-105 transition-all disabled:opacity-50">

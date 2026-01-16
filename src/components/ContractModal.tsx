@@ -110,7 +110,7 @@ export const ContractModal = ({ isOpen, onClose, contract, readOnly = false }: P
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 font-sans">
+    <div className="fixed inset-0 z-250 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 font-sans">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0" />
       
       <motion.div 

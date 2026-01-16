@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'; // 1. Import useEffect
+import  { useEffect } from 'react'; // 1. Import useEffect
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom'; // 2. Import useNavigate
 import { z } from 'zod';
@@ -51,7 +51,7 @@ export const Login = () => {
         }}
       >
         {/* Overlay dégradé */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"></div>
 
         {/* Contenu Texte sur l'image */}
         <div className="relative z-10 mb-10">
@@ -69,7 +69,7 @@ export const Login = () => {
       {/* --- COLONNE DROITE : Le Formulaire --- */}
       <div className="flex w-full items-center justify-center bg-white px-8 py-12 lg:w-1/2 lg:px-24">
         
-        <div className="w-full max-w-[440px] mx-auto">
+        <div className="w-full max-w-110 mx-auto">
           <div className="mb-12">
             <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">Bon retour.</h2>
             <p className="mt-3 text-lg text-slate-500">
@@ -80,7 +80,7 @@ export const Login = () => {
           {/* Message d'erreur */}
           {error && (
             <div className="mb-6 flex items-center rounded-lg bg-red-50/80 p-4 text-sm text-red-700 border-l-4 border-red-600">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 mr-3 flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 mr-3 shrink-0">
                 <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.401 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
               </svg>
               {error}
@@ -123,7 +123,7 @@ export const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative mt-8 w-full overflow-hidden rounded-xl bg-gradient-to-br from-red-600 to-red-800 py-4 text-base font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-red-500/50 hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+              className="group relative mt-8 w-full overflow-hidden rounded-xl bg-linear-to-br from-red-600 to-red-800 py-4 text-base font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:shadow-red-500/50 hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <div className="absolute inset-0 h-full w-full bg-white/0 transition-all group-hover:bg-white/10"></div>
               <span className="relative">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Plus, Search, Filter, Edit2, Trash2, 
@@ -65,7 +65,7 @@ export default function FixedChargesPage() {
   );
 
   return (
-    <div className="p-6 md:p-8 max-w-[1600px] mx-auto space-y-8">
+    <div className="p-6 md:p-8 max-w-400 mx-auto space-y-8">
       
       {/* --- HEADER --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -115,7 +115,7 @@ export default function FixedChargesPage() {
           {filteredItems.map((charge) => {
             const cat = getCategoryDetails(charge.category);
             return (
-              <div key={charge.id} className="group bg-white rounded-[2rem] p-6 border border-slate-100 hover:border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all">
+              <div key={charge.id} className="group bg-white rounded-4xl p-6 border border-slate-100 hover:border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all">
                 
                 {/* Card Top: Title & Menu */}
                 <div className="flex justify-between items-start mb-6">
@@ -182,8 +182,8 @@ export default function FixedChargesPage() {
 
       {/* --- CONFIRMATION MODAL (DELETE) --- */}
       {deleteId !== null && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
+        <div className="fixed inset-0 z-110 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-4xl p-8 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
             <div className="mx-auto w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
               <AlertTriangle className="text-red-600" size={32} />
             </div>

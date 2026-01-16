@@ -225,7 +225,7 @@ export const Settings = () => {
           <button
             onClick={handleSave}
             disabled={isLoading}
-            className="flex items-center justify-center rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02] hover:shadow-red-500/40 disabled:opacity-70"
+            className="flex items-center justify-center rounded-xl bg-linear-to-r from-red-500 to-red-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-red-500/30 transition-all hover:scale-[1.02] hover:shadow-red-500/40 disabled:opacity-70"
           >
             {isLoading ? (
               <span className="flex items-center">Sauvegarde...</span>

@@ -29,7 +29,7 @@ import { PurchaseOrdersPage } from './pages/PurchaseOrdersPage';
 
 // --- RH (RESSOURCES HUMAINES) ---
 import { AttendancesPage } from './pages/AttendancesPage';
-import { ReportsPage } from './pages/ReportsPage'; // ✅ IMPORT ADDED
+import { ReportsPage } from './pages/ReportsPage'; 
 import { ContractsPage } from './pages/ContractsPage'; 
 import { EOSBPage } from './pages/EOSBPage'; 
 import { PaymentsPage } from './pages/Paiement';

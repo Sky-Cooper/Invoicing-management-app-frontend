@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Wallet, Save, DollarSign, Calendar, Hash, 
-  Search, Briefcase, FileText, Pencil, X,
-  Loader2, ArrowUpRight, TrendingDown, 
+  Save, DollarSign, 
+  Search, Briefcase, Pencil, X,
+  Loader2, TrendingDown, 
   ChevronDown, Building2, AlertCircle, CheckCircle2,
-  Tags, Truck, Hammer, HardHat, Users, 
-  Upload, Image as ImageIcon, Trash2, Eye, Copy 
-} from 'lucide-react';
+  Tags, Truck, Hammer, Users, 
+  Upload, Image as ImageIcon, Trash2, Eye} from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks/hooks';
 import { fetchExpenses, addExpense, updateExpense } from '../store/slices/expensesSlice'; 
 import { fetchChantiers } from '../store/slices/chantierSlice'; 
@@ -54,7 +53,7 @@ const getCategoryStyle = (category: string) => {
 
 export const ExpensesPage = () => {
   const dispatch = useAppDispatch();
-  const { expenses, isLoading } = useAppSelector((state) => state.expenses);
+  const { expenses } = useAppSelector((state) => state.expenses);
   const { items: realChantiers, isLoading: loadingChantiers } = useAppSelector((state) => state.chantiers);
   const { accessToken } = useAppSelector((state) => state.auth);
 
@@ -205,7 +204,7 @@ export const ExpensesPage = () => {
         {feedbackModal.isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeFeedback} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[32px] shadow-2xl w-full max-w-md relative z-10 overflow-hidden" >
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-4xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden" >
               <div className={`p-8 text-center space-y-6 ${feedbackModal.type === 'success' ? 'bg-emerald-50/50' : 'bg-rose-50/50'}`}>
                 <div className="flex justify-center">
                   <div className={`h-20 w-20 rounded-full flex items-center justify-center shadow-lg mb-2 ${feedbackModal.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
@@ -275,7 +274,7 @@ export const ExpensesPage = () => {
         {viewModal.isOpen && viewModal.expense && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setViewModal({ isOpen: false, expense: null })} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 30 }} className="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl relative z-10 overflow-hidden max-h-[90vh] flex flex-col">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 30 }} className="bg-white w-full max-w-2xl rounded-4xl shadow-2xl relative z-10 overflow-hidden max-h-[90vh] flex flex-col">
               <div className="p-8 border-b border-slate-100 flex justify-between items-start bg-slate-50">
                 <div>
                    <div className="flex items-center gap-2 mb-2">
@@ -316,9 +315,9 @@ export const ExpensesPage = () => {
                  )}
                  <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><ImageIcon size={14} />Justificatif (Reçu)</p>
-                    <div className="rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 min-h-[200px] flex items-center justify-center relative group">
+                    <div className="rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 min-h-50 flex items-center justify-center relative group">
                         {viewModal.expense.document ? (
-                            <img src={getFullImageUrl(viewModal.expense.document)} alt="Reçu" className="w-full h-auto object-contain max-h-[400px]" />
+                            <img src={getFullImageUrl(viewModal.expense.document)} alt="Reçu" className="w-full h-auto object-contain max-h-100" />
                         ) : (
                             <div className="flex flex-col items-center gap-2 text-slate-300"><ImageIcon size={48} /><span className="text-xs font-bold">Aucun justificatif joint</span></div>
                         )}
@@ -330,7 +329,7 @@ export const ExpensesPage = () => {
         )}
       </AnimatePresence>
 
-      <main className="max-w-[1600px] mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="max-w-400 mx-auto p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* ... Left Column (List) ... */}
         <div className="lg:col-span-4 flex flex-col gap-6 h-[calc(100vh-120px)] sticky top-8">
           <div className="space-y-4 text-left">
@@ -363,7 +362,7 @@ export const ExpensesPage = () => {
                                 <Icon size={10} />
                                 <span className="text-[9px] font-bold uppercase">{exp.category}</span>
                              </div>
-                             <span className="text-[10px] font-semibold text-slate-500 truncate max-w-[100px]">{chantierName}</span>
+                             <span className="text-[10px] font-semibold text-slate-500 truncate max-w-25">{chantierName}</span>
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
@@ -383,7 +382,7 @@ export const ExpensesPage = () => {
 
         {/* ... Center Column (Form) ... */}
         <div className="lg:col-span-5">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden sticky top-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-4xl shadow-2xl shadow-slate-200/60 border border-slate-100 overflow-hidden sticky top-8">
             <div className={`p-8 text-white relative overflow-hidden transition-colors duration-500 ${isEditing ? 'bg-[#2563EB]' : 'bg-slate-900'}`}>
               <div className="absolute -right-6 -top-6 p-8 opacity-10 rotate-12"><Briefcase size={140} /></div>
               <div className="relative z-10 text-left">
@@ -432,7 +431,7 @@ export const ExpensesPage = () => {
                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Montant (MAD TTC)</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none"><DollarSign className={isEditing ? 'text-[#2563EB]' : 'text-rose-500'} size={24} /></div>
-                  <input type="number" step="0.01" required placeholder="0.00" className="block w-full pl-16 pr-8 py-5 bg-slate-50 border-2 border-transparent rounded-[24px] text-3xl font-black text-slate-900 focus:bg-white focus:border-blue-500 transition-all outline-none" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} />
+                  <input type="number" step="0.01" required placeholder="0.00" className="block w-full pl-16 pr-8 py-5 bg-slate-50 border-2 border-transparent rounded-3xl text-3xl font-black text-slate-900 focus:bg-white focus:border-blue-500 transition-all outline-none" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} />
                 </div>
               </div>
 
@@ -467,7 +466,7 @@ export const ExpensesPage = () => {
                 ) : (
                     <div className="relative w-full h-48 bg-slate-900 rounded-2xl overflow-hidden group border-2 border-slate-200">
                         <img src={previewUrl} alt="Reçu" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-transparent to-transparent" />
                         <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white"><ImageIcon size={16} /><span className="text-xs font-bold">Image sélectionnée</span></div>
                         <button type="button" onClick={handleRemoveFile} className="absolute top-3 right-3 p-2 bg-white/20 hover:bg-red-500 backdrop-blur-md rounded-xl text-white transition-all transform hover:scale-105"><Trash2 size={16} /></button>
                     </div>
@@ -490,7 +489,7 @@ export const ExpensesPage = () => {
           {/* UPDATED WIDGET: CLICKABLE TO SHOW FULL AMOUNT */}
           <div 
             onClick={() => setIsTotalModalOpen(true)}
-            className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 cursor-pointer hover:border-rose-300 hover:shadow-md transition-all group"
+            className="bg-white rounded-4xl p-8 shadow-sm border border-slate-100 cursor-pointer hover:border-rose-300 hover:shadow-md transition-all group"
           >
               <div className="flex items-center gap-2 mb-6">
                 <div className="p-2 bg-rose-50 rounded-lg group-hover:bg-rose-100 transition-colors"><TrendingDown size={16} className="text-rose-500" /></div>

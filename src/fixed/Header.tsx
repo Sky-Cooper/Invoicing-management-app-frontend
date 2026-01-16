@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import  { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Bell, Menu, ChevronDown, User, LogOut, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -128,7 +128,7 @@ export const Header = ({ title, onMenuClick }: HeaderProps) => {
         <div className="group relative">
           <div className="flex cursor-pointer items-center gap-3 rounded-[1.2rem] bg-white border border-slate-200 py-1.5 pl-1.5 pr-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all active:scale-95">
             {/* Avatar container avec gradient subtil */}
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-50 to-slate-100 flex items-center justify-center text-indigo-600 shadow-inner">
+            <div className="h-9 w-9 rounded-xl bg-linear-to-br from-indigo-50 to-slate-100 flex items-center justify-center text-indigo-600 shadow-inner">
                <User size={18} strokeWidth={2.5} />
             </div>
             
@@ -145,7 +145,7 @@ export const Header = ({ title, onMenuClick }: HeaderProps) => {
           </div>
 
           {/* DROPDOWN MENU */}
-          <div className="absolute right-0 top-full mt-3 w-56 bg-white rounded-[2rem] shadow-2xl border border-slate-100 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all translate-y-2 group-hover:translate-y-0 z-50">
+          <div className="absolute right-0 top-full mt-3 w-56 bg-white rounded-4xl shadow-2xl border border-slate-100 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all translate-y-2 group-hover:translate-y-0 z-50">
              <div className="px-6 py-3 border-b border-slate-50 mb-2 text-left">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Compte professionnel</p>
                 <p className="text-sm font-black text-slate-900 mt-1 truncate">{userData.name}</p>

@@ -142,7 +142,7 @@ export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
+    <div className="fixed inset-0 z-250 flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0" />
       
       <motion.div 
@@ -150,7 +150,7 @@ export const QuoteEditModal = ({ isOpen, onClose, quote }: Props) => {
         className="relative w-full max-w-7xl bg-[#fcfcfc] border border-white rounded-[3.5rem] shadow-[0_30px_100px_-20px_rgba(15,23,42,0.4)] overflow-hidden mt-10 mb-10 flex flex-col"
       >
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-black p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0">
+        <div className="bg-linear-to-r from-slate-900 via-slate-800 to-black p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0">
           <div className="flex items-center gap-6 relative z-10">
             <div className="p-5 bg-white/20 rounded-[1.8rem] backdrop-blur-md border border-white/30 shadow-inner">
                 <FileEdit size={32} className="text-white drop-shadow-md" />

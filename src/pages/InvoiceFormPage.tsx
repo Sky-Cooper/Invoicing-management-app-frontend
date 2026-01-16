@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import  { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Plus, ArrowLeft, Receipt, BadgeCheck, 
+  Plus, ArrowLeft, Receipt,
   Search, LayoutPanelTop, Calendar, 
   ChevronLeft, ChevronRight, X, Filter,
   ArrowUpDown, CheckCircle2, AlertCircle
@@ -125,7 +125,7 @@ export const InvoicesPage = () => {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 lg:p-10 space-y-8 min-h-screen bg-[#f8f9fa] text-slate-800 font-sans">
+    <div className="max-w-400 mx-auto p-4 lg:p-10 space-y-8 min-h-screen bg-[#f8f9fa] text-slate-800 font-sans">
       <AnimatePresence mode="wait">
         {!showForm ? (
           <motion.div 
@@ -160,7 +160,7 @@ export const InvoicesPage = () => {
                   onClick={() => setShowForm(true)}
                   className="group relative overflow-hidden bg-slate-900 text-white pl-6 pr-8 py-3.5 rounded-2xl font-bold text-sm transition-all hover:shadow-lg hover:shadow-slate-900/20 hover:-translate-y-0.5 active:scale-95 flex items-center gap-3"
               >
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-linear-to-r from-red-600 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <Plus size={18} className="relative z-10" strokeWidth={3} /> 
                   <span className="relative z-10">Nouvelle Facture</span>
               </button>
@@ -262,7 +262,7 @@ export const InvoicesPage = () => {
             </div>
 
             {/* --- MAIN CONTENT CARD --- */}
-            <div className="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden flex flex-col min-h-[600px]">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col min-h-150">
                 
                 {/* Table Header */}
                 <div className="px-8 py-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
@@ -326,7 +326,7 @@ export const InvoicesPage = () => {
                 </div>
 
                 {/* Footer Gradient */}
-                <div className="h-2 bg-gradient-to-r from-red-500/10 via-slate-100 to-red-500/10"></div>
+                <div className="h-2 bg-linear-to-r from-red-500/10 via-slate-100 to-red-500/10"></div>
             </div>
           </motion.div>
         ) : (
@@ -351,7 +351,7 @@ export const InvoicesPage = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                 <div className="bg-slate-50/50 p-8 lg:p-12">
                     <InvoiceForm onCancel={() => setShowForm(false)} />
                 </div>

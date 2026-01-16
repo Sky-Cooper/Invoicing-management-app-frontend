@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye, Edit3, Calendar, Hash, User, BadgeCheck } from 'lucide-react';
 import type { Invoice } from '../store/slices/invoiceSlice';

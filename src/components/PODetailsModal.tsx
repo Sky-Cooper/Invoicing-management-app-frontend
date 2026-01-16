@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   X, Calendar, Briefcase, 
   User, Truck, ShoppingCart, ShieldCheck,
@@ -40,7 +39,7 @@ export const PODetailsModal = ({ isOpen, onClose, po }: Props) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 font-sans">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-6 font-sans">
           
           {/* Backdrop */}
           <motion.div 
@@ -54,7 +53,7 @@ export const PODetailsModal = ({ isOpen, onClose, po }: Props) => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-4xl bg-white rounded-[24px] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
+            className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
           >
             
             {/* TOP HEADER */}

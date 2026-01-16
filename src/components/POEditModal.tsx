@@ -128,7 +128,7 @@ export const POEditModal = ({ isOpen, onClose, po }: Props) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
+    <div className="fixed inset-0 z-250 flex items-start justify-center bg-slate-900/70 backdrop-blur-md p-6 overflow-y-auto font-sans">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0" />
       
       <motion.div 
@@ -136,7 +136,7 @@ export const POEditModal = ({ isOpen, onClose, po }: Props) => {
         className="relative w-full max-w-7xl bg-[#fcfcfc] border border-white rounded-[3.5rem] shadow-[0_30px_100px_-20px_rgba(15,23,42,0.4)] overflow-hidden mt-10 mb-10 flex flex-col"
       >
         {/* HEADER */}
-        <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0">
+        <div className="bg-linear-to-r from-indigo-900 via-indigo-800 to-slate-900 p-10 flex justify-between items-center text-white relative overflow-hidden shrink-0">
           <div className="flex items-center gap-6 relative z-10">
             <div className="p-5 bg-white/20 rounded-[1.8rem] backdrop-blur-md border border-white/30 shadow-inner">
                 <FileEdit size={32} className="text-white drop-shadow-md" />
@@ -251,7 +251,7 @@ export const POEditModal = ({ isOpen, onClose, po }: Props) => {
         {/* FOOTER */}
         <div className="p-10 border-t border-slate-100 bg-white flex justify-end gap-6 shrink-0">
           <button type="button" onClick={onClose} className="px-10 py-5 text-slate-400 hover:text-slate-900 font-black uppercase text-xs tracking-[0.2em] transition-colors">Fermer</button>
-          <button onClick={handleUpdate} disabled={isLoading} className="bg-gradient-to-r from-indigo-900 to-slate-900 hover:from-black hover:to-indigo-900 text-white px-16 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] flex items-center gap-4 transition-all shadow-2xl active:scale-95 disabled:opacity-50">
+          <button onClick={handleUpdate} disabled={isLoading} className="bg-linear-to-r from-indigo-900 to-slate-900 hover:from-black hover:to-indigo-900 text-white px-16 py-5 rounded-4xl font-black uppercase text-xs tracking-[0.2em] flex items-center gap-4 transition-all shadow-2xl active:scale-95 disabled:opacity-50">
             {isLoading ? <Loader2 className="animate-spin" size={20}/> : <Save size={20} />} Enregistrer
           </button>
         </div>

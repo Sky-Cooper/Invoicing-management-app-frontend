@@ -1,9 +1,8 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Edit3, Building2, Mail, Phone, MapPin, 
-  Fingerprint, Briefcase, Globe, Hash, ShieldCheck, 
-  Calendar, ExternalLink, User, FileText, Download 
+  Edit3, Building2, Mail, Phone, MapPin, 
+  Fingerprint, Globe, Hash, ShieldCheck, 
+  ExternalLink, User, FileText, Download 
 } from 'lucide-react';
 import { type Client } from '../store/slices/clientSlice';
 import { API_ROOT } from '../api/client'; // Import for document URLs
@@ -21,7 +20,7 @@ export const ClientDetailsModal = ({ isOpen, onClose, client, onEdit }: Props) =
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-10">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 lg:p-10">
           {/* Overlay avec flou artistique */}
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -38,7 +37,7 @@ export const ClientDetailsModal = ({ isOpen, onClose, client, onEdit }: Props) =
           >
             
             {/* SECTION GAUCHE : Header Identitaire (Rouge Vibrant) */}
-            <div className="w-full lg:w-80 bg-gradient-to-br from-red-600 to-red-800 p-10 flex flex-col items-center text-center text-white shrink-0">
+            <div className="w-full lg:w-80 bg-linear-to-br from-red-600 to-red-800 p-10 flex flex-col items-center text-center text-white shrink-0">
               <div className="relative group">
                 <div className="w-32 h-32 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center overflow-hidden border-4 border-white/20">
                    {client.logo ? (
@@ -121,7 +120,7 @@ export const ClientDetailsModal = ({ isOpen, onClose, client, onEdit }: Props) =
                     <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600"><MapPin size={20}/></div>
                     <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Localisation</h3>
                   </div>
-                  <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-start gap-4">
+                  <div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0">
                         <Globe className="text-slate-300" size={24} />
                     </div>

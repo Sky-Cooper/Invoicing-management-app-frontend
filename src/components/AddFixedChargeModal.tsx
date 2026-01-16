@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { X, Loader2, Building2, Calendar, Coins, Tag, Wallet, Truck, HardHat, Package } from 'lucide-react';
+import { X, Loader2, Building2, Calendar, Coins, Tag, Truck, HardHat, Package } from 'lucide-react';
 import { addFixedCharge, updateFixedCharge, resetFixedChargeStatus } from '../store/slices/fixedChargeSlice';
 import { fetchChantiers } from '../store/slices/chantierSlice'; // Assuming you have this
 import type { AppDispatch, RootState } from '../store/store';
@@ -80,7 +80,7 @@ export const AddFixedChargeModal = ({ isOpen, onClose, initialData }: ModalProps
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-2xl rounded-[2.5rem] bg-white p-8 shadow-2xl overflow-y-auto max-h-[95vh] border border-slate-100">
         
         {/* Header */}

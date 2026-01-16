@@ -192,7 +192,7 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4">
+      <div className="fixed inset-0 z-150 flex items-center justify-center bg-slate-900/60 backdrop-blur-xl p-4">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -200,11 +200,11 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
           className="bg-white rounded-[3.5rem] w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden shadow-[0_30px_70px_-15px_rgba(220,38,38,0.25)] border border-white"
         >
           {/* HEADER */}
-          <div className="bg-gradient-to-r from-red-600 via-red-700 to-red-800 px-10 py-10 flex justify-between items-center shrink-0 relative overflow-hidden">
+          <div className="bg-linear-to-r from-red-600 via-red-700 to-red-800 px-10 py-10 flex justify-between items-center shrink-0 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
             
             <div className="flex items-center gap-6 relative z-10">
-              <div className="p-4 bg-white/20 rounded-[1.5rem] backdrop-blur-md border border-white/30 shadow-inner">
+              <div className="p-4 bg-white/20 rounded-3xl backdrop-blur-md border border-white/30 shadow-inner">
                 {initialData ? <Edit3 className="text-white" size={32} /> : <Fingerprint className="text-white" size={32} />}
               </div>
               <div>
@@ -234,13 +234,13 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
               
               {/* VISUAL LEFT */}
               <div className="lg:col-span-3 flex flex-col items-center gap-8 text-center">
-                <div className="w-full aspect-[4/5] bg-white rounded-[2.5rem] border-2 border-slate-100 flex flex-col items-center justify-center text-slate-200 gap-4 shadow-sm group hover:border-red-200 hover:bg-red-50/30 transition-all overflow-hidden relative">
+                <div className="w-full aspect-4/5 bg-white rounded-[2.5rem] border-2 border-slate-100 flex flex-col items-center justify-center text-slate-200 gap-4 shadow-sm group hover:border-red-200 hover:bg-red-50/30 transition-all overflow-hidden relative">
                   <User size={80} strokeWidth={1} className="group-hover:text-red-400 transition-colors drop-shadow-sm relative z-10" />
                   <div className="absolute bottom-0 inset-x-0 bg-slate-900/5 py-3 text-center z-10">
                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Photo Profil</span>
                   </div>
                 </div>
-                <div className="w-full h-1 bg-gradient-to-r from-transparent via-red-200 to-transparent opacity-30" />
+                <div className="w-full h-1 bg-linear-to-r from-transparent via-red-200 to-transparent opacity-30" />
                 <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">Dossier Personnel</p>
               </div>
 
@@ -299,7 +299,7 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
                                 value={formData.user.department} 
                                 onChange={(e) => setFormData({...formData, user: {...formData.user, department: e.target.value}})}
                                 disabled={!isCompanyAdmin} 
-                                className={`w-full pl-16 pr-12 py-5 rounded-[2rem] border-2 outline-none font-bold text-sm transition-all shadow-sm appearance-none cursor-pointer
+                                className={`w-full pl-16 pr-12 py-5 rounded-4xl border-2 outline-none font-bold text-sm transition-all shadow-sm appearance-none cursor-pointer
                                     ${!isCompanyAdmin 
                                         ? 'bg-slate-50 border-slate-100 text-slate-500 cursor-not-allowed opacity-80' 
                                         : 'bg-white border-slate-100 text-slate-700 cursor-pointer focus:border-red-500/40'
@@ -355,8 +355,8 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
                 type="submit"
                 onClick={handleSubmit}
                 disabled={isCreating || isUpdating || success}
-                className={`min-w-[340px] py-6 px-10 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-xl hover:-translate-y-1 active:scale-95
-                  ${success ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-red-500/40 hover:shadow-red-500/60'}
+                className={`min-w-85 py-6 px-10 rounded-4xl font-black text-[11px] uppercase tracking-[0.4em] flex items-center justify-center gap-4 transition-all shadow-xl hover:-translate-y-1 active:scale-95
+                  ${success ? 'bg-emerald-600 text-white shadow-emerald-500/30' : 'bg-linear-to-r from-red-600 to-red-800 text-white shadow-red-500/40 hover:shadow-red-500/60'}
                   disabled:opacity-50`}
               >
                 {isCreating || isUpdating ? <Loader2 className="animate-spin" size={20} /> : success ? <CheckCircle2 size={20} /> : null}
@@ -375,7 +375,7 @@ const EmployeeModal = ({ isOpen, onClose, initialData }: EmployeeModalProps) => 
 const SectionHeader = ({ title }: { title: string }) => (
   <div className="flex items-center gap-6">
     <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] whitespace-nowrap">{title}</h3>
-    <div className="h-[2px] w-full bg-gradient-to-r from-red-100 to-transparent rounded-full" />
+    <div className="h-0.5 w-full bg-linear-to-r from-red-100 to-transparent rounded-full" />
   </div>
 );
 
@@ -389,7 +389,7 @@ const InputField = ({ label, icon, value, onChange, type = "text", required = fa
       <input 
         type={type} 
         required={required}
-        className={`w-full pl-16 pr-6 py-5 rounded-[2rem] bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm
+        className={`w-full pl-16 pr-6 py-5 rounded-4xl bg-white border-2 outline-none font-bold text-sm transition-all text-slate-700 shadow-sm
           ${error ? 'border-red-500 bg-red-50' : 'border-slate-100 focus:border-red-500/40 focus:ring-4 focus:ring-red-500/5'}`}
         value={value || ''} 
         onChange={typeof onChange === 'function' ? (e) => onChange(e.target ? e.target.value : e) : undefined}

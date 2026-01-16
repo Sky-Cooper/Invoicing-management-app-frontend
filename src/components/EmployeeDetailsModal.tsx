@@ -1,7 +1,6 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Edit3, User, Mail, Phone, ShieldCheck, 
+  Edit3, User, Phone, ShieldCheck, 
   Briefcase, Calendar, Hash, Fingerprint, Award
 } from 'lucide-react';
 import type { Employee } from '../store/slices/employeeSlice';
@@ -19,7 +18,7 @@ export const EmployeeDetailsModal = ({ isOpen, onClose, employee, onEdit }: View
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-10">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 lg:p-10">
           {/* Overlay avec flou artistique */}
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -36,7 +35,7 @@ export const EmployeeDetailsModal = ({ isOpen, onClose, employee, onEdit }: View
           >
             
             {/* SECTION GAUCHE : Header Identitaire (Rouge Vibrant) */}
-            <div className="w-full lg:w-80 bg-gradient-to-br from-red-600 to-red-800 p-10 flex flex-col items-center text-center text-white shrink-0">
+            <div className="w-full lg:w-80 bg-linear-to-br from-red-600 to-red-800 p-10 flex flex-col items-center text-center text-white shrink-0">
               <div className="relative group">
                 <div className="w-32 h-32 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center overflow-hidden border-4 border-white/20 text-red-600">
                    {/* Fallback avatar if no image */}

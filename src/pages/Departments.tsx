@@ -60,7 +60,7 @@ export const Departments = () => {
           className={`group flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold shadow-lg transition-all active:scale-95
             ${isAddMode 
               ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' 
-              : 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-red-500/30'
+              : 'bg-linear-to-r from-red-600 to-red-700 text-white hover:shadow-red-500/30'
             }`}
         >
           {isAddMode ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}

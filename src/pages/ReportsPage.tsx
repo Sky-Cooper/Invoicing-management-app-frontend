@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   FileText, Download, Calendar, Filter, 
-  Loader2, File, ChevronRight, Clock
+  Loader2, File, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -28,7 +28,7 @@ export const ReportsPage = () => {
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         
         {/* HEADER */}
-        <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+        <div className="bg-white rounded-4xl p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           
           <div className="relative z-10">
@@ -39,7 +39,7 @@ export const ReportsPage = () => {
             <div className="flex flex-col md:flex-row justify-between items-end gap-6">
               <div>
                 <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-3">
-                  Rapports de <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Pointage</span>
+                  Rapports de <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600">Pointage</span>
                 </h1>
                 <p className="text-slate-400 font-medium text-sm leading-relaxed max-w-xl">
                   Consultez et téléchargez les relevés d'heures officiels. Ces documents sont générés automatiquement basés sur le pointage quotidien validé.
@@ -93,7 +93,7 @@ export const ReportsPage = () => {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                   key={report.id}
-                  className="group bg-white rounded-[2rem] p-1 border border-slate-100 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col"
+                  className="group bg-white rounded-4xl p-1 border border-slate-100 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 flex flex-col"
                 >
                   <div className="p-6 flex-1">
                     <div className="flex justify-between items-start mb-6">

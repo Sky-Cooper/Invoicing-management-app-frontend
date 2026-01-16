@@ -16,7 +16,7 @@ export const AddAdminModal = ({ isOpen, onClose, initialData }: ModalProps) => {
   const { items: departments } = useSelector((state: RootState) => state.departments);
   
   // ✅ 1. Get ERROR from Redux
-  const { isCreating, isUpdating, isLoading, error } = useSelector((state: RootState) => state.deptAdmins);
+  const { isLoading, error } = useSelector((state: RootState) => state.deptAdmins);
 
   const [formData, setFormData] = useState({
     first_name: '', 
@@ -67,7 +67,7 @@ export const AddAdminModal = ({ isOpen, onClose, initialData }: ModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-lg rounded-[2.5rem] bg-white p-8 shadow-2xl overflow-y-auto max-h-[95vh] border border-slate-100">
         <div className="flex items-center justify-between mb-8">
           <div>
