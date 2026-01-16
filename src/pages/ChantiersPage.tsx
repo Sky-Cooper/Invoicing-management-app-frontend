@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   Plus, Search, MapPin, 
   Edit3, HardHat, Link2, UserCheck,
-  BadgeCheck, Hash, Briefcase, Trash2, AlertTriangle, X 
+  BadgeCheck, Hash, Briefcase, Trash2, AlertTriangle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
