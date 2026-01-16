@@ -1,0 +1,35 @@
+# --- SECURITY ---
+DEBUG=False
+SECRET_KEY="django-insecure-#wxtg131w50o!^jlsnix!rq4pa!%6^(dm!ss=3pmacsjvx9933"
+# (Ideally, generate a new random secret key for production)
+
+# --- DOMAINS & CORS (Crucial for Vercel) ---
+ALLOWED_HOSTS=api.tourtra.ma,localhost,127.0.0.1,YOUR_HETZNER_IP
+CORS_ALLOWED_ORIGINS=https://tourtra.ma,https://www.tourtra.ma
+CSRF_TRUSTED_ORIGINS=https://tourtra.ma,https://www.tourtra.ma
+
+# --- DATABASE ---
+DB_NAME=invoicingdb
+DB_USER=postgres
+DB_PASSWORD=0
+# If you are using Docker Compose, use the service name 'db'. 
+# If you are running standard Gunicorn/Postgres on the server, use 'localhost'.
+DB_HOST=localhost
+DB_PORT=5432
+
+# --- REDIS ---
+# If using Docker Compose, keep this as 'redis'. If standard install, use 'localhost'.
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# --- EMAIL ---
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_HOST_USER='mouadhoumada@gmail.com'
+EMAIL_HOST_PASSWORD='axec gmbh frqm dcbr'
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+
+# --- API KEYS ---
+# PASTE YOUR *NEW* OPENAI KEY HERE (Not the old compromised one)
+OPENAI_KEY='sk-proj-NEW-KEY-HERE'
