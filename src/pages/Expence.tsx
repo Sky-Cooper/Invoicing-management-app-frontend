@@ -13,7 +13,7 @@ import { fetchExpenses, addExpense, updateExpense } from '../store/slices/expens
 import { fetchChantiers } from '../store/slices/chantierSlice'; 
 
 // --- CONFIGURATION ---
-const API_BASE_URL = 'http://127.0.0.1:8000'; 
+const API_BASE_URL = 'https://api.tourtra.ma'; 
 
 // --- HELPER ---
 const getFullImageUrl = (path: string | null | undefined): string | undefined => {
