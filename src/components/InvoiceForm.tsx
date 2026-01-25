@@ -10,7 +10,7 @@ import { fetchClients } from '../store/slices/clientSlice';
 import { fetchChantiers } from '../store/slices/chantierSlice';
 import { fetchItems } from '../store/slices/itemSlice';
 
-const UNIT_TYPES = ["day", "bag", "M", "unité", "heure", "m²", "m³", "kg", "ton"] as const;
+// Constant kept but not used anymore since we switched to manual input
 
 export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
   const dispatch = useAppDispatch();
@@ -48,7 +48,7 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
         item_id: null, 
         item_name: '', 
         item_description: '', 
-        unit: 'unité', 
+        unit: '', 
         quantity: '1.00', 
         unit_price: '0.00', 
         tax_rate: '20.00', 
@@ -57,17 +57,14 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
     }
   ]);
 
-  // --- NEW HANDLER: Select Chantier & Auto-fill Contract ---
+  // --- Select Chantier & Auto-fill Contract ---
   const handleChantierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
-    
-    // Find the full chantier object to get its contract number
     const selectedChantier = chantiers.find(c => c.id === Number(selectedId));
 
     setFormData(prev => ({
         ...prev,
         chantier: selectedId,
-        // Auto-fill contract number if found, otherwise reset or keep empty
         contract_number: selectedChantier ? selectedChantier.contract_number : ''
     }));
   };
@@ -84,6 +81,7 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
         item_name: product.name,
         item_description: product.description || '',
         unit: product.unit,
+        item_code: null, // Ensure item_code is handled if present in type definition
         unit_price: product.unit_price,
         tax_rate: product.tax_rate,
         subtotal: (parseFloat(String(product.unit_price)) * parseFloat(String(newItems[index].quantity || '1'))).toFixed(2)
@@ -153,17 +151,17 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-7xl mx-auto space-y-8 pb-24 font-sans text-slate-900">
+    <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto space-y-6 lg:space-y-8 pb-24 font-sans text-slate-900 px-4 lg:px-0">
       
       {/* HEADER SECTION */}
-      <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
+      <div className="bg-white rounded-3xl lg:rounded-[2.5rem] p-6 lg:p-8 border border-slate-100 shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex items-center gap-4">
                 <div className="p-3 bg-red-50 rounded-2xl text-red-600">
                     <BadgeCheck size={32} />
                 </div>
                 <div>
-                    <h2 className="text-xl font-black uppercase tracking-tighter text-slate-900">Nouvelle Facture</h2>
+                    <h2 className="text-lg lg:text-xl font-black uppercase tracking-tighter text-slate-900">Nouvelle Facture</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">N° sera généré automatiquement</p>
                 </div>
             </div>
@@ -182,10 +180,10 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* LEFT COLUMN: CLIENT & PROJECT INFO */}
           <div className="lg:col-span-4 space-y-6">
-             <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm h-full flex flex-col gap-6">
+             <div className="bg-white rounded-3xl lg:rounded-[2.5rem] p-6 lg:p-8 border border-slate-100 shadow-sm h-full flex flex-col gap-6">
                 <div>
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                         <User size={12} /> Client Facturé
@@ -234,7 +232,7 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                       <Briefcase size={12}/> Objet de la mission
                    </label>
                    <textarea required placeholder="Description détaillée..." value={formData.project_description} onChange={(e) => setFormData({...formData, project_description: e.target.value})}
-                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-medium text-slate-600 h-32 outline-none focus:bg-white focus:border-red-500 transition-all resize-none" />
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-medium text-slate-600 h-32 outline-none focus:bg-white focus:border-red-500 transition-all resize-none" />
                 </div>
 
                 {/* --- CONDITIONAL CONTRACT NUMBER --- */}
@@ -253,19 +251,20 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
 
           {/* RIGHT COLUMN: ITEMS & TOTALS */}
           <div className="lg:col-span-8 space-y-6">
-             <div className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-sm min-h-100 flex flex-col">
-                <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+             <div className="bg-white border border-slate-100 rounded-3xl lg:rounded-[2.5rem] overflow-hidden shadow-sm min-h-100 flex flex-col">
+                <div className="px-6 lg:px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
                     <h3 className="font-black text-slate-800 uppercase text-xs tracking-widest flex items-center gap-2">
                         <BadgeCheck size={16} className="text-red-600"/> Lignes de prestations
                     </h3>
-                    <button type="button" onClick={() => setItems([...items, { item_id: null, item_name: '', unit: 'day', quantity: '1.00', unit_price: '0.00', tax_rate: '20.00', subtotal: '0.00' }])}
+                    <button type="button" onClick={() => setItems([...items, { item_id: null, item_name: '', unit: 'day', quantity: '1.00', unit_price: '0.00', tax_rate: '20.00', subtotal: '0.00', item_code: null }])}
                         className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 shadow-lg shadow-slate-200">
                         <Plus size={12} strokeWidth={3} /> Ajouter
                     </button>
                 </div>
 
-                <div className="p-6 space-y-4 flex-1">
-                    <div className="grid grid-cols-12 gap-4 px-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                <div className="p-4 lg:p-6 space-y-4 flex-1">
+                    {/* Desktop Header */}
+                    <div className="hidden lg:grid grid-cols-12 gap-4 px-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                         <div className="col-span-5">Désignation (Catalogue ou Libre)</div>
                         <div className="col-span-2">Unité</div>
                         <div className="col-span-2 text-center">Qté</div>
@@ -274,15 +273,17 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                     </div>
 
                     {items.map((item, index) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start group">
-                        <div className="md:col-span-5 relative">
+                      <div key={index} className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start group border-b border-slate-50 lg:border-0 pb-4 lg:pb-0 mb-4 lg:mb-0 last:border-0">
+                        {/* Description */}
+                        <div className="lg:col-span-5 relative">
+                            <label className="lg:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Désignation</label>
                             <input 
                                 placeholder="Désignation..." 
                                 value={item.item_name} 
                                 onChange={(e) => handleItemChange(index, 'item_name', e.target.value)} 
                                 className="w-full bg-slate-50 border border-transparent focus:bg-white focus:border-red-500 rounded-xl py-3 px-4 text-sm font-bold text-slate-800 outline-none transition-all" 
                             />
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 lg:translate-y-[-50%] lg:top-1/2 mt-3 lg:mt-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                 <div className="relative">
                                     <Box size={16} className="text-indigo-500 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2" />
                                     <select 
@@ -297,23 +298,37 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                                 </div>
                             </div>
                         </div>
-                        <div className="md:col-span-2">
-                            <select value={item.unit} onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-xl py-3 px-2 text-[10px] font-bold text-slate-600 outline-none cursor-pointer uppercase">
-                                {UNIT_TYPES.map(u => <option key={u} value={u}>{u}</option>)}
-                            </select>
+
+                        {/* Unit - CHANGED TO MANUAL INPUT */}
+                        <div className="lg:col-span-2">
+                            <label className="lg:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Unité</label>
+                            <input 
+                                type="text"
+                                placeholder="Unité"
+                                value={item.unit} 
+                                onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
+                                className="w-full bg-white border border-slate-200 rounded-xl py-3 px-3 text-xs font-bold text-slate-600 outline-none uppercase text-center"
+                            />
                         </div>
-                        <div className="md:col-span-2">
+
+                        {/* Quantity */}
+                        <div className="lg:col-span-2">
+                            <label className="lg:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Quantité</label>
                             <input type="number" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} 
                                 className="w-full bg-slate-50 rounded-xl py-3 text-center text-sm font-black outline-none focus:ring-2 focus:ring-red-500/20" />
                         </div>
-                        <div className="md:col-span-2">
+
+                        {/* Unit Price */}
+                        <div className="lg:col-span-2">
+                            <label className="lg:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Prix Unitaire</label>
                             <input type="number" value={item.unit_price} onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)} 
                                 className="w-full bg-slate-50 rounded-xl py-3 text-right px-3 text-sm font-black outline-none focus:ring-2 focus:ring-red-500/20" />
                         </div>
-                        <div className="md:col-span-1 flex justify-center pt-3">
+
+                        {/* Delete Button */}
+                        <div className="lg:col-span-1 flex justify-end lg:justify-center pt-3 lg:pt-3">
                             <button type="button" onClick={() => setItems(items.filter((_, i) => i !== index))} 
-                                className="text-slate-300 hover:text-red-500 transition-colors">
+                                className="text-slate-300 hover:text-red-500 transition-colors bg-slate-50 lg:bg-transparent p-2 rounded-lg lg:p-0">
                                 <Trash2 size={18}/>
                             </button>
                         </div>
@@ -327,7 +342,7 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                 </div>
              </div>
 
-             <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+             <div className="bg-slate-900 text-white p-6 lg:p-8 rounded-3xl lg:rounded-[2.5rem] shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-[80px] -mr-16 -mt-16 pointer-events-none"></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                     <div className="space-y-4">
@@ -354,10 +369,10 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
                             <span className="font-mono font-bold text-red-400">-{totals.discount_amount} DH</span>
                         </div>
                     </div>
-                    <div className="flex flex-col justify-between border-l border-slate-700 pl-8">
+                    <div className="flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-700 pt-6 md:pt-0 md:pl-8 mt-4 md:mt-0">
                         <div>
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 block mb-1">Total TTC</span>
-                            <span className="text-4xl font-black tracking-tighter leading-none">{totals.total_ttc} <span className="text-lg text-slate-500">DH</span></span>
+                            <span className="text-3xl lg:text-4xl font-black tracking-tighter leading-none">{totals.total_ttc} <span className="text-lg text-slate-500">DH</span></span>
                         </div>
                         <div className="mt-6 pt-4 border-t border-slate-800">
                             <div className="flex items-center gap-2 mb-1">
@@ -372,12 +387,12 @@ export const InvoiceForm = ({ onCancel }: { onCancel: () => void }) => {
           </div>
       </div>
 
-      <div className="flex justify-end items-center gap-6 pt-4 border-t border-slate-100">
-        {error && <p className="text-red-500 font-bold text-xs bg-red-50 px-4 py-2 rounded-lg">{typeof error === 'string' ? error : 'Erreur de validation'}</p>}
-        <button type="button" onClick={onCancel} className="px-8 py-4 rounded-4xl font-black uppercase text-[10px] tracking-[0.2em] text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all">
+      <div className="flex flex-col-reverse md:flex-row justify-end items-center gap-4 lg:gap-6 pt-4 border-t border-slate-100">
+        {error && <p className="text-red-500 font-bold text-xs bg-red-50 px-4 py-2 rounded-lg w-full md:w-auto text-center">{typeof error === 'string' ? error : 'Erreur de validation'}</p>}
+        <button type="button" onClick={onCancel} className="w-full md:w-auto px-8 py-4 rounded-4xl font-black uppercase text-[10px] tracking-[0.2em] text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all">
             Abandonner
         </button>
-        <button type="submit" disabled={isLoading} className="bg-red-600 text-white px-10 py-5 rounded-[2.5rem] font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 shadow-xl shadow-red-600/30 hover:bg-red-700 hover:scale-105 transition-all disabled:opacity-50">
+        <button type="submit" disabled={isLoading} className="w-full md:w-auto bg-red-600 text-white px-10 py-5 rounded-[2.5rem] font-black uppercase text-[10px] tracking-[0.3em] flex justify-center items-center gap-3 shadow-xl shadow-red-600/30 hover:bg-red-700 hover:scale-105 transition-all disabled:opacity-50">
           {isLoading ? <Loader2 className="animate-spin" size={18}/> : <Save size={18} />}
           Enregistrer Facture
         </button>

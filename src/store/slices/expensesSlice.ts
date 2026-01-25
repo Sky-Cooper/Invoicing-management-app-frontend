@@ -16,6 +16,7 @@ export interface ExpenseInput {
 
 // 2. OUTPUT: Matches Django Response (uses 'document')
 export interface Expense {
+  created_by: any;
   id: number;
   title: string;
   category: string;
