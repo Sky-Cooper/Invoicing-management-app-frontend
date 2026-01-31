@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   FileText, Download, Calendar, Filter, 
-  Loader2, File, Clock, Plus, ArrowRight} from 'lucide-react';
+  Loader2, File, Clock, Plus, ArrowRight
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import type { AppDispatch, RootState } from '../store/store';
 import { fetchAttendanceReports, generateAttendanceReport } from '../store/slices/attendanceSlice';
+// Import the API client to access the dynamic base URL
+import { safeApi } from '../api/client'; 
 
 export const ReportsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -41,8 +44,15 @@ export const ReportsPage = () => {
       // 2. Success: Open the file and refresh list
       const fileUrl = resultAction.payload.file_url;
       
-      // Ideally backend returns full URL, if relative, prepend host
-      const downloadLink = fileUrl.startsWith('http') ? fileUrl : `http://127.0.0.1:8000${fileUrl}`;
+      let downloadLink = fileUrl;
+
+      // If the URL is relative, prepend the API base URL dynamically
+      if (!fileUrl.startsWith('http')) {
+          // Retrieve baseURL from axios instance (removes trailing slash if present)
+          const baseUrl = safeApi.defaults.baseURL?.replace(/\/$/, '') || '';
+          downloadLink = `${baseUrl}${fileUrl}`;
+      }
+      
       window.open(downloadLink, '_blank');
 
       // Refresh the list to show the new item
