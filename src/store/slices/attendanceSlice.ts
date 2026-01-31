@@ -12,11 +12,10 @@ export interface Attendance {
   chantier: number | { id: number; name: string };
 }
 
-// New Interface for Reports
 export interface AttendanceReport {
   id: number;
   title: string;
-  report_type: 'WEEKLY' | 'MONTHLY';
+  report_type: 'WEEKLY' | 'MONTHLY' | 'CUSTOM'; // Added CUSTOM
   start_date: string;
   end_date: string;
   file: string;
@@ -32,11 +31,24 @@ export interface AttendancePayload {
   chantier: number;
 }
 
+// Payload for the new endpoint
+export interface GenerateReportPayload {
+  start_date: string;
+  end_date: string;
+}
+
+// Response from the new endpoint
+export interface GenerateReportResponse {
+    message: string;
+    file_url: string;
+}
+
 interface AttendanceState {
   items: Attendance[];
-  reports: AttendanceReport[]; // <--- Added reports array
+  reports: AttendanceReport[];
   isLoading: boolean;
-  isReportsLoading: boolean;   // <--- Specific loading state for reports
+  isReportsLoading: boolean;
+  isGeneratingReport: boolean; // <--- New state for the generation button
   success: boolean;
   error: any | null;
 }
@@ -46,6 +58,7 @@ const initialState: AttendanceState = {
   reports: [],
   isLoading: false,
   isReportsLoading: false,
+  isGeneratingReport: false,
   success: false,
   error: null,
 };
@@ -66,19 +79,14 @@ export const fetchAttendances = createAsyncThunk(
   }
 );
 
-// 2. FETCH REPORTS (New Implementation)
-// Pass 'ALL', 'WEEKLY', or 'MONTHLY' to target specific endpoints
+// 2. FETCH REPORTS
 export const fetchAttendanceReports = createAsyncThunk(
   'attendances/fetchReports',
   async (type: 'ALL' | 'WEEKLY' | 'MONTHLY' = 'ALL', { rejectWithValue }) => {
     try {
       let url = '/attendance-reports/';
-      
-      if (type === 'WEEKLY') {
-        url = '/attendance-reports/weekly/';
-      } else if (type === 'MONTHLY') {
-        url = '/attendance-reports/monthly/';
-      }
+      if (type === 'WEEKLY') url = '/attendance-reports/weekly/';
+      else if (type === 'MONTHLY') url = '/attendance-reports/monthly/';
 
       const response = await safeApi.get<AttendanceReport[]>(url);
       return response.data;
@@ -89,29 +97,43 @@ export const fetchAttendanceReports = createAsyncThunk(
   }
 );
 
-// 3. MARK/UPDATE ATTENDANCE
+// 3. GENERATE NEW REPORT (New Endpoint Logic)
+export const generateAttendanceReport = createAsyncThunk(
+    'attendances/generateReport',
+    async (data: GenerateReportPayload, { rejectWithValue }) => {
+      try {
+        // CALL THE NEW ENDPOINT
+        const response = await safeApi.post<GenerateReportResponse>('/attendance-reports/generate/', data);
+        
+        // Return data
+        return response.data;
+      } catch (err) {
+        const error = err as AxiosError<any>;
+        return rejectWithValue(error.response?.data?.detail || 'Erreur lors de la génération du rapport');
+      }
+    }
+  );
+
+// 4. MARK/UPDATE ATTENDANCE
 export const markAttendance = createAsyncThunk(
   'attendances/mark',
   async ({ id, data }: { id?: number; data: AttendancePayload }, { rejectWithValue }) => {
     try {
       if (id) {
-        // UPDATE existing attendance
         const response = await safeApi.patch<Attendance>(`/attendances/${id}/`, data);
         return response.data;
       } else {
-        // CREATE new attendance
         const response = await safeApi.post<Attendance>('/attendances/', data);
         return response.data;
       }
     } catch (err) {
       const error = err as AxiosError<any>;
-      console.error("Attendance Error:", error.response?.data);
       return rejectWithValue(error.response?.data || 'Erreur de sauvegarde');
     }
   }
 );
 
-// 4. DELETE ATTENDANCE
+// 5. DELETE ATTENDANCE
 export const deleteAttendance = createAsyncThunk(
   'attendances/delete',
   async (id: number, { rejectWithValue }) => {
@@ -131,11 +153,8 @@ const attendanceSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // --- Fetch Records ---
-      .addCase(fetchAttendances.pending, (state) => { 
-        state.isLoading = true; 
-        state.error = null; 
-      })
+      // ... existing reducers ...
+      .addCase(fetchAttendances.pending, (state) => { state.isLoading = true; })
       .addCase(fetchAttendances.fulfilled, (state, action) => {
         state.isLoading = false;
         state.items = action.payload;
@@ -145,11 +164,8 @@ const attendanceSlice = createSlice({
         state.error = action.payload;
       })
 
-      // --- Fetch Reports (New) ---
-      .addCase(fetchAttendanceReports.pending, (state) => {
-        state.isReportsLoading = true;
-        state.error = null;
-      })
+      // Reports List
+      .addCase(fetchAttendanceReports.pending, (state) => { state.isReportsLoading = true; })
       .addCase(fetchAttendanceReports.fulfilled, (state, action) => {
         state.isReportsLoading = false;
         state.reports = action.payload;
@@ -159,32 +175,35 @@ const attendanceSlice = createSlice({
         state.error = action.payload;
       })
 
-      // --- Mark (Create/Update) ---
-      .addCase(markAttendance.pending, (state) => {
-        state.isLoading = true;
+      // --- GENERATE REPORT HANDLERS ---
+      .addCase(generateAttendanceReport.pending, (state) => {
+        state.isGeneratingReport = true;
         state.error = null;
       })
+      .addCase(generateAttendanceReport.fulfilled, (state) => {
+        state.isGeneratingReport = false;
+        // Note: The new file URL is in action.payload.file_url if you need to use it directly
+      })
+      .addCase(generateAttendanceReport.rejected, (state, action) => {
+        state.isGeneratingReport = false;
+        state.error = action.payload;
+      })
+
+      // Mark Attendance
+      .addCase(markAttendance.pending, (state) => { state.isLoading = true; })
       .addCase(markAttendance.fulfilled, (state, action) => {
         state.isLoading = false;
         state.success = true;
-        
         const index = state.items.findIndex(i => i.id === action.payload.id);
-        
-        if (index !== -1) {
-          state.items = state.items.map(item => 
-            item.id === action.payload.id ? action.payload : item
-          );
-        } else {
-          state.items.push(action.payload);
-        }
+        if (index !== -1) state.items[index] = action.payload;
+        else state.items.push(action.payload);
       })
       .addCase(markAttendance.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-        alert("Erreur lors du pointage.");
       })
 
-      // --- Delete ---
+      // Delete
       .addCase(deleteAttendance.fulfilled, (state, action) => {
         state.items = state.items.filter(i => i.id !== action.payload);
       });

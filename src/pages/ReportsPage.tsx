@@ -1,27 +1,59 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   FileText, Download, Calendar, Filter, 
-  Loader2, File, Clock
-} from 'lucide-react';
+  Loader2, File, Clock, Plus, ArrowRight} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import type { AppDispatch, RootState } from '../store/store';
-import { fetchAttendanceReports } from '../store/slices/attendanceSlice';
+import { fetchAttendanceReports, generateAttendanceReport } from '../store/slices/attendanceSlice';
 
 export const ReportsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   
   // Selectors
-  const { reports, isReportsLoading } = useSelector((state: RootState) => state.attendances);
+  const { reports, isReportsLoading, isGeneratingReport } = useSelector((state: RootState) => state.attendances);
   
   // Local State
   const [filterType, setFilterType] = useState<'ALL' | 'WEEKLY' | 'MONTHLY'>('ALL');
+  
+  // Form State for Custom Generation
+  const [dateRange, setDateRange] = useState({
+    start_date: '',
+    end_date: ''
+  });
 
   // Fetch on mount or when filter changes
   useEffect(() => {
     dispatch(fetchAttendanceReports(filterType));
   }, [dispatch, filterType]);
+
+  const handleGenerate = async () => {
+    if (!dateRange.start_date || !dateRange.end_date) {
+      alert("Veuillez sélectionner une date de début et de fin.");
+      return;
+    }
+
+    // 1. Dispatch the generation action
+    const resultAction = await dispatch(generateAttendanceReport(dateRange));
+
+    if (generateAttendanceReport.fulfilled.match(resultAction)) {
+      // 2. Success: Open the file and refresh list
+      const fileUrl = resultAction.payload.file_url;
+      
+      // Ideally backend returns full URL, if relative, prepend host
+      const downloadLink = fileUrl.startsWith('http') ? fileUrl : `http://127.0.0.1:8000${fileUrl}`;
+      window.open(downloadLink, '_blank');
+
+      // Refresh the list to show the new item
+      dispatch(fetchAttendanceReports(filterType));
+      
+      // Reset form
+      setDateRange({ start_date: '', end_date: '' });
+    } else {
+      alert("Erreur lors de la génération du rapport");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 pb-20">
@@ -42,11 +74,70 @@ export const ReportsPage = () => {
                   Rapports de <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600">Pointage</span>
                 </h1>
                 <p className="text-slate-400 font-medium text-sm leading-relaxed max-w-xl">
-                  Consultez et téléchargez les relevés d'heures officiels. Ces documents sont générés automatiquement basés sur le pointage quotidien validé.
+                  Générez des rapports personnalisés ou consultez l'historique des relevés d'heures.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
 
-              {/* FILTER TABS */}
+        {/* GENERATOR SECTION (New) */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <Plus className="text-indigo-600" size={20} />
+                Nouveau Rapport
+            </h2>
+            <div className="flex flex-col md:flex-row items-end gap-4">
+                <div className="w-full md:w-auto">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">
+                        Date de début
+                    </label>
+                    <input 
+                        type="date" 
+                        value={dateRange.start_date}
+                        onChange={(e) => setDateRange({...dateRange, start_date: e.target.value})}
+                        className="w-full md:w-48 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 outline-none transition-all focus:ring-2" 
+                    />
+                </div>
+                <div className="hidden md:block pb-4 text-slate-300">
+                    <ArrowRight size={20} />
+                </div>
+                <div className="w-full md:w-auto">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 ml-1">
+                        Date de fin
+                    </label>
+                    <input 
+                        type="date" 
+                        value={dateRange.end_date}
+                        onChange={(e) => setDateRange({...dateRange, end_date: e.target.value})}
+                        className="w-full md:w-48 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 outline-none transition-all focus:ring-2" 
+                    />
+                </div>
+                
+                <button
+                    onClick={handleGenerate}
+                    disabled={isGeneratingReport}
+                    className="w-full md:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                    {isGeneratingReport ? (
+                        <>
+                            <Loader2 size={18} className="animate-spin" />
+                            Génération...
+                        </>
+                    ) : (
+                        <>
+                            <FileText size={18} />
+                            Générer PDF
+                        </>
+                    )}
+                </button>
+            </div>
+        </div>
+
+        {/* FILTERS & LIST */}
+        <div className="flex items-center justify-between">
+             <h3 className="text-xl font-bold text-slate-800">Historique</h3>
+             {/* FILTER TABS */}
               <div className="bg-slate-100/50 p-1.5 rounded-2xl flex items-center gap-1 w-full md:w-auto">
                 {(['ALL', 'WEEKLY', 'MONTHLY'] as const).map((type) => (
                   <button
@@ -58,12 +149,10 @@ export const ReportsPage = () => {
                         : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'}
                     `}
                   >
-                    {type === 'ALL' ? 'Tout' : type === 'WEEKLY' ? 'Hebdomadaire' : 'Mensuel'}
+                    {type === 'ALL' ? 'Tout' : type === 'WEEKLY' ? 'Hebdo' : 'Mensuel'}
                   </button>
                 ))}
               </div>
-            </div>
-          </div>
         </div>
 
         {/* CONTENT GRID */}
@@ -79,7 +168,7 @@ export const ReportsPage = () => {
             </div>
             <h3 className="text-slate-900 font-black text-xl mb-2">Aucun rapport trouvé</h3>
             <p className="text-slate-400 text-sm max-w-xs text-center">
-              Aucun document ne correspond à vos critères de recherche pour le moment.
+              Utilisez le formulaire ci-dessus pour générer votre premier rapport.
             </p>
           </div>
         ) : (
@@ -100,15 +189,18 @@ export const ReportsPage = () => {
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-black shadow-sm transition-colors
                         ${report.report_type === 'WEEKLY' 
                           ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white' 
-                          : 'bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white'}
+                          : report.report_type === 'MONTHLY' 
+                             ? 'bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white'
+                             : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white' // Style for Custom
+                        }
                       `}>
-                        {report.report_type === 'WEEKLY' ? 'H' : 'M'}
+                        {report.report_type === 'WEEKLY' ? 'H' : report.report_type === 'MONTHLY' ? 'M' : 'C'}
                       </div>
                       <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-lg border border-slate-100">
                         <Calendar size={12} className="text-slate-400" />
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
-                           {/* Assuming report contains year or we infer it */}
-                           {new Date().getFullYear()}
+                           {/* Fallback to created_at year or current year */}
+                           {report.created_at ? new Date(report.created_at).getFullYear() : new Date().getFullYear()}
                         </span>
                       </div>
                     </div>
