@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import type { AppDispatch, RootState } from '../store/store';
 import { fetchAttendanceReports, generateAttendanceReport } from '../store/slices/attendanceSlice';
-// Import the API client to access the dynamic base URL
 import { safeApi } from '../api/client'; 
 
 export const ReportsPage = () => {
@@ -46,10 +45,17 @@ export const ReportsPage = () => {
       
       let downloadLink = fileUrl;
 
-      // If the URL is relative, prepend the API base URL dynamically
+      // Logic to construct the correct URL
       if (!fileUrl.startsWith('http')) {
-          // Retrieve baseURL from axios instance (removes trailing slash if present)
-          const baseUrl = safeApi.defaults.baseURL?.replace(/\/$/, '') || '';
+          let baseUrl = safeApi.defaults.baseURL || '';
+          
+          // REMOVE '/api' from the end of the base URL if it exists
+          // This turns 'https://api.tourtra.ma/api' into 'https://api.tourtra.ma'
+          baseUrl = baseUrl.replace(/\/api\/?$/, '');
+          
+          // Remove any remaining trailing slash to avoid double slashes
+          baseUrl = baseUrl.replace(/\/$/, '');
+
           downloadLink = `${baseUrl}${fileUrl}`;
       }
       
@@ -201,7 +207,7 @@ export const ReportsPage = () => {
                           ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white' 
                           : report.report_type === 'MONTHLY' 
                              ? 'bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white'
-                             : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white' // Style for Custom
+                             : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white'
                         }
                       `}>
                         {report.report_type === 'WEEKLY' ? 'H' : report.report_type === 'MONTHLY' ? 'M' : 'C'}
@@ -209,7 +215,6 @@ export const ReportsPage = () => {
                       <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-lg border border-slate-100">
                         <Calendar size={12} className="text-slate-400" />
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
-                           {/* Fallback to created_at year or current year */}
                            {report.created_at ? new Date(report.created_at).getFullYear() : new Date().getFullYear()}
                         </span>
                       </div>
